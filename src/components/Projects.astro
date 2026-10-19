@@ -1,0 +1,153 @@
+---
+/*
+ * Projects — a grid of project cards.
+ *
+ * Each card has:
+ *   • a colored top strip with the title
+ *   • a screenshot area (falls back to a generic image)
+ *   • description + tech tags + View / Code buttons
+ *
+ * Hovering lifts the card slightly. Empty image sources use the
+ * fallback image defined in the data file.
+ */
+
+import { projects, FALLBACK_PROJECT_IMAGE } from '../data/portfolio';
+import Icon from './Icon.astro';
+---
+
+<section id="projects" class="section projects">
+  <div class="container">
+
+    <header class="section-header">
+      <span class="section-header__icon section-header__icon--cream">
+        <Icon name="folder" size={16} />
+      </span>
+      <h2 class="section-title">Proyectos</h2>
+    </header>
+
+    <div class="grid grid--3 projects__grid">
+      {projects.map((project) => {
+        const imageSrc = project.image || FALLBACK_PROJECT_IMAGE;
+        const safeLink = project.link === '#' ? undefined : project.link;
+        const safeGithub = project.github === '#' ? undefined : project.github;
+        return (
+          <article class="card-flat projects__card hover-slide-up">
+
+            <header class={`projects__head ${project.colorClass}`}>
+              <h3 class="projects__title">{project.title}</h3>
+            </header>
+
+            <div class="projects__image-wrap">
+              <img
+                class="projects__image"
+                src={imageSrc}
+                alt={`Captura del proyecto ${project.title}`}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+
+            <div class="projects__body">
+              <p class="projects__description">{project.description}</p>
+
+              <div class="projects__technologies">
+                {project.technologies.map((tech) => (
+                  <span class="tag">{tech}</span>
+                ))}
+              </div>
+
+              <div class="projects__links">
+                <a
+                  class="btn btn--primary flex-1 projects__button"
+                  href={safeLink ?? '#'}
+                  aria-disabled={!safeLink}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <Icon name="external-link" size={16} />
+                  Ver
+                </a>
+                <a
+                  class="btn btn--secondary flex-1 projects__button"
+                  href={safeGithub ?? '#'}
+                  aria-disabled={!safeGithub}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <Icon name="github" size={16} />
+                  Código
+                </a>
+              </div>
+            </div>
+
+          </article>
+        );
+      })}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* Same white sandwich as the Skills section to break up the page. */
+  .projects {
+    background-color: var(--color-white);
+    border-top: var(--border-bottom-thick);
+    border-bottom: var(--border-bottom-thick);
+  }
+
+  .projects__head {
+    border-bottom: var(--border-bottom-thick);
+    padding: var(--space-4);
+  }
+
+  .projects__title {
+    font-size: var(--text-xl);
+    font-weight: 700;
+  }
+
+  .projects__image-wrap {
+    border-bottom: var(--border-bottom-thick);
+    height: 12rem;
+    background-color: var(--color-white);
+    overflow: hidden;
+  }
+
+  .projects__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .projects__body {
+    padding: var(--space-4);
+  }
+
+  .projects__description {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-4);
+  }
+
+  .projects__technologies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .projects__links {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .projects__button {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  /* "#" links should look distinctly disabled. */
+  a[aria-disabled="true"] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+</style>

@@ -1,0 +1,111 @@
+---
+/*
+ * Experience — a vertical stack of job cards.
+ *
+ * Each job card has a colored header with the title, company, and period;
+ * the body has the description and a row of technology tags.
+ */
+
+import { experiences } from '../data/portfolio';
+import Icon from './Icon.astro';
+---
+
+<section id="experience" class="section">
+  <div class="container">
+
+    <header class="section-header">
+      <span class="section-header__icon">
+        <Icon name="briefcase" size={16} />
+      </span>
+      <h2 class="section-title">Experiencia</h2>
+    </header>
+
+    <div class="experience__list">
+      {experiences.map((job) => (
+        <article class="card experience__card hover-slide-right">
+
+          <header class={`experience__head ${job.colorClass}`}>
+            <div>
+              <h3 class="experience__title">{job.title}</h3>
+              <p class="experience__company">{job.company}</p>
+            </div>
+
+            <div class="experience__period">
+              <Icon name="calendar" size={20} />
+              <span>{job.period}</span>
+            </div>
+          </header>
+
+          <div class="experience__body">
+            <p class="experience__description">{job.description}</p>
+
+            <div class="experience__technologies">
+              {job.technologies.map((tech) => (
+                <span class="tag tag--dark">{tech}</span>
+              ))}
+            </div>
+          </div>
+
+        </article>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .experience__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .experience__card {
+    box-shadow: var(--shadow-medium);
+  }
+
+  .experience__head {
+    border-bottom: var(--border-bottom-thick);
+    padding: var(--space-4);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .experience__title {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+  }
+
+  .experience__company {
+    font-size: var(--text-lg);
+    font-weight: 700;
+  }
+
+  .experience__period {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    border: var(--border-medium);
+    background-color: var(--color-white);
+    padding: var(--space-2) var(--space-4);
+    font-weight: 700;
+  }
+
+  .experience__body {
+    padding: var(--space-6);
+  }
+
+  .experience__description {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-4);
+  }
+
+  .experience__technologies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+</style>

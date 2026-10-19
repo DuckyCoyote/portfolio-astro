@@ -1,0 +1,294 @@
+---
+/*
+ * Contact — form on the left, info + social + status panel on the right.
+ *
+ * The form is a real <form> with accessible labels and proper validation
+ * attributes. Behavior (validation, cooldown, EmailJS delivery) is wired
+ * up in /src/scripts/contact-form.ts which reads data-* attributes from
+ * this template.
+ *
+ * The status banner is hidden until the JS shows it.
+ */
+
+import {
+  socialLinks,
+  contactEmail,
+  contactPhone,
+  contactIntro,
+} from '../data/portfolio';
+import Icon from './Icon.astro';
+import type { SocialLink } from '../data/portfolio';
+
+const MESSAGE_MAX = 1000;
+
+/* Map the icon string from the data file to the Icon component name. */
+const ICON_FOR: Record<SocialLink['icon'], 'github' | 'linkedin' | 'twitter' | 'mail'> = {
+  github:   'github',
+  linkedin: 'linkedin',
+  twitter:  'twitter',
+  mail:     'mail',
+};
+---
+
+<section id="contact" class="section">
+  <div class="container">
+
+    <header class="section-header">
+      <span class="section-header__icon">
+        <Icon name="send" size={16} />
+      </span>
+      <h2 class="section-title">Contacto</h2>
+    </header>
+
+    <div class="grid grid--2 contact__grid">
+
+      {/* ============== Form column ============== */}
+      <div class="card contact__form-card">
+        <h3 class="contact__form-title">Envíame un mensaje</h3>
+
+        <form class="contact__form" data-contact-form>
+
+          <div class="field">
+            <label class="field__label" for="contact-name">NOMBRE:</label>
+            <input
+              class="field__input"
+              type="text"
+              id="contact-name"
+              name="name"
+              required
+              minlength="2"
+              maxlength="100"
+              placeholder="Tu nombre"
+              data-contact-name
+            />
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="contact-email">EMAIL:</label>
+            <input
+              class="field__input"
+              type="email"
+              id="contact-email"
+              name="email"
+              required
+              placeholder="tu@email.com"
+              data-contact-email
+            />
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="contact-message">
+              MENSAJE: (<span data-contact-counter>0</span>/{MESSAGE_MAX})
+            </label>
+            <textarea
+              class="field__input"
+              id="contact-message"
+              name="message"
+              required
+              minlength="10"
+              maxlength={MESSAGE_MAX}
+              rows="5"
+              placeholder="Tu mensaje aquí (mínimo 10 caracteres)..."
+              data-contact-message
+            ></textarea>
+          </div>
+
+          <button class="btn btn--primary contact__submit" type="submit" data-contact-submit>
+            <Icon name="send" size={20} />
+            <span data-contact-submit-label>ENVIAR MENSAJE</span>
+          </button>
+
+          {/* Status banner — kinds: success | error | cooldown | limit */}
+          <div
+            class="contact__banner banner"
+            role="status"
+            aria-live="polite"
+            data-contact-banner
+            data-kind=""
+            hidden
+          ></div>
+
+        </form>
+      </div>
+
+      {/* ============== Info column ============== */}
+      <div class="contact__info">
+
+        <div class="contact__intro bg-green border-4">
+          <h3 class="contact__intro-title">¡Trabajemos juntos!</h3>
+          <p class="contact__intro-text">{contactIntro}</p>
+          <div class="contact__contact-lines">
+            📧 {contactEmail}<br />
+            📱 {contactPhone}
+          </div>
+        </div>
+
+        <div class="contact__social bg-white border-4">
+          <h3 class="contact__social-title">Encuéntrame en:</h3>
+          <div class="grid contact__social-grid">
+            {socialLinks.map((social) => {
+              const safeUrl = social.url === '#contact' ? '#contact' : social.url;
+              return (
+                <a
+                  class={`contact__social-card ${social.colorClass} border-4`}
+                  href={safeUrl}
+                  rel="noopener noreferrer"
+                  target={safeUrl.startsWith('http') ? '_blank' : '_self'}
+                >
+                  <Icon name={ICON_FOR[social.icon]} size={32} />
+                  <span class="contact__social-label">{social.label}</span>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+
+        <div class="contact__status border-4">
+          <div class="contact__status-label">STATUS:</div>
+          <div class="contact__status-row">
+            <span class="contact__status-dot anim-pulse" aria-hidden="true"></span>
+            <span class="contact__status-text">DISPONIBLE</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  /* Wire up the form. The actual logic lives in src/scripts/contact-form.ts;
+     this block is a thin Astro script entry point. */
+  import '../scripts/contact-form';
+</script>
+
+<style>
+  /* ============== Form card ============== */
+
+  .contact__grid {
+    gap: var(--space-8);
+  }
+
+  .contact__form-card {
+    padding: var(--space-8);
+  }
+
+  .contact__form-title {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
+    border-bottom: var(--border-bottom-thick);
+  }
+
+  .contact__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .contact__submit {
+    width: 100%;
+    padding: var(--space-3) var(--space-6);
+  }
+
+  /* ============== Info column ============== */
+
+  .contact__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .contact__intro {
+    padding: var(--space-8);
+  }
+
+  .contact__intro-title {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    margin-bottom: var(--space-4);
+  }
+
+  .contact__intro-text {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-4);
+  }
+
+  .contact__contact-lines {
+    font-size: var(--text-lg);
+    font-weight: 700;
+  }
+
+  .contact__social {
+    padding: var(--space-6);
+  }
+
+  .contact__social-title {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: var(--border-bottom-thick);
+  }
+
+  .contact__social-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .contact__social-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    transition: var(--transition-transform);
+  }
+
+  .contact__social-card:hover {
+    transform: translate(4px, 4px);
+  }
+
+  .contact__social-label {
+    font-weight: 700;
+    font-size: var(--text-sm);
+  }
+
+  /* ============== Status panel ============== */
+
+  .contact__status {
+    background-color: var(--color-black);
+    padding: var(--space-6);
+    text-align: center;
+  }
+
+  .contact__status-label {
+    color: var(--color-green);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-2);
+  }
+
+  .contact__status-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+
+  .contact__status-dot {
+    width: 1rem;
+    height: 1rem;
+    background-color: var(--color-green);
+    display: inline-block;
+  }
+
+  .contact__status-text {
+    color: var(--color-green);
+    font-weight: 700;
+    font-size: var(--text-lg);
+  }
+</style>

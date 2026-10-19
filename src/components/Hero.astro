@@ -1,0 +1,222 @@
+---
+/*
+ * Hero — the first screen a visitor sees.
+ *
+ * Layout: a single thick-bordered card with a 2-column grid inside.
+ * Left column: badge, headline, two CTAs. Right column: a "retro computer
+ * screen" decoration with animated dots. The right column hides on mobile.
+ */
+
+import { heroContent } from '../data/portfolio';
+import Icon from './Icon.astro';
+---
+
+<section id="hero" class="hero">
+  <div class="container">
+    <div class="hero__card">
+      <div class="hero__grid">
+
+        {/* ---------------- Left column ---------------- */}
+        <div class="hero__intro">
+          <span class="hero__badge">{heroContent.badge}</span>
+
+          <h1 class="hero__heading">
+            <span class="hero__line">{heroContent.greeting}</span>
+            <span class="hero__line">{heroContent.name}</span>
+          </h1>
+
+          <p class="hero__tagline">{heroContent.tagline}</p>
+
+          <div class="hero__actions">
+            <a class="btn btn--primary" href={heroContent.primaryCta.href}>
+              {heroContent.primaryCta.label}
+              <Icon name="arrow-right" size={20} />
+            </a>
+            <a class="btn btn--secondary" href={heroContent.secondaryCta.href}>
+              {heroContent.secondaryCta.label}
+              <Icon name="terminal" size={20} />
+            </a>
+          </div>
+        </div>
+
+        {/* ---------------- Right column ---------------- */}
+        <div class="hero__illustration md-show">
+          <div class="hero__illustration-frame">
+            <div class="hero__screen" aria-hidden="true">
+              <div class="hero__screen-tint"></div>
+              <div class="hero__screen-content">
+                <div class="hero__code">&lt;/&gt;</div>
+                <div class="hero__dots">
+                  <span class="hero__dot anim-pulse"></span>
+                  <span class="hero__dot anim-pulse anim-delay-1"></span>
+                  <span class="hero__dot anim-pulse anim-delay-2"></span>
+                </div>
+              </div>
+            </div>
+            {/* Decorative corner squares — magenta + cyan, anchored to opposite corners. */}
+            <span class="hero__corner hero__corner--magenta" aria-hidden="true"></span>
+            <span class="hero__corner hero__corner--cyan"    aria-hidden="true"></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* The hero fills the viewport vertically and centers its content. */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (min-width: 48rem) {
+    .hero { padding-block: var(--space-4); }
+  }
+
+  @media (min-width: 64rem) {
+    .hero { padding-block: var(--space-20); }
+  }
+
+  .hero__card {
+    border: 8px solid var(--color-black);
+    background-color: var(--color-white);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-large);
+  }
+
+  @media (min-width: 48rem) {
+    .hero__card { padding: var(--space-12); }
+  }
+
+  .hero__grid {
+    display: grid;
+    gap: var(--space-8);
+    align-items: center;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 48rem) {
+    .hero__grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ---------------- Left column ---------------- */
+
+  .hero__badge {
+    display: inline-block;
+    border: var(--border-medium);
+    background-color: var(--color-green);
+    padding: var(--space-2) var(--space-4);
+    margin-bottom: var(--space-6);
+    font-weight: 700;
+    font-size: var(--text-sm);
+  }
+
+  .hero__heading {
+    font-size: var(--text-5xl);
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: var(--space-4);
+  }
+
+  @media (min-width: 48rem) {
+    .hero__heading { font-size: var(--text-7xl); }
+  }
+
+  .hero__line {
+    display: block;
+  }
+
+  .hero__tagline {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    margin-bottom: var(--space-8);
+  }
+
+  @media (min-width: 48rem) {
+    .hero__tagline { font-size: var(--text-2xl); }
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  /* ---------------- Right column ---------------- */
+
+  .hero__illustration-frame {
+    position: relative;
+    border: 8px solid var(--color-black);
+    background-color: var(--color-white);
+    padding: var(--space-8);
+  }
+
+  /* The "computer screen" — black square with a green tint on top. */
+  .hero__screen {
+    position: relative;
+    aspect-ratio: 1;
+    border: var(--border-medium);
+    background-color: var(--color-black);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero__screen-tint {
+    position: absolute;
+    inset: var(--space-4);
+    background-color: var(--color-green);
+    opacity: 0.2;
+  }
+
+  .hero__screen-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .hero__code {
+    color: var(--color-green);
+    font-weight: 700;
+    font-size: var(--text-6xl);
+    margin-bottom: var(--space-4);
+  }
+
+  .hero__dots {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+
+  .hero__dot {
+    width: 1rem;
+    height: 1rem;
+    background-color: var(--color-green);
+    display: block;
+  }
+
+  /* Decorative magenta + cyan squares, anchored to opposite corners. */
+  .hero__corner {
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    border: var(--border-medium);
+  }
+
+  .hero__corner--magenta {
+    top: -1rem;
+    right: -1rem;
+    background-color: var(--color-magenta);
+  }
+
+  .hero__corner--cyan {
+    bottom: -1rem;
+    left: -1rem;
+    background-color: var(--color-cyan);
+  }
+</style>

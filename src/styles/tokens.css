@@ -1,0 +1,91 @@
+/*
+ * Design tokens for the retro portfolio.
+ *
+ * Every visual value in the site is defined here as a CSS custom property so
+ * the rest of the stylesheet can read like prose. The theme is intentionally
+ * a maximalist 80s/90s palette: hard borders, flat colors, no gradients,
+ * no rounded corners. When in doubt, look here first.
+ */
+
+:root {
+  /* ------------------------------------------------------------- */
+  /* Palette — flat neon colors used everywhere in the design.      */
+  /* ------------------------------------------------------------- */
+
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-cream: #f5e6d3;            /* warm beige page background */
+  --color-green: #00ff00;            /* terminal / matrix green */
+  --color-magenta: #ff00ff;
+  --color-cyan: #00ffff;
+  --color-yellow: #ffff00;
+  --color-red: #ff0000;
+  --color-coral: #ff6b6b;
+  --color-teal: #4ecdc4;
+
+  /* ------------------------------------------------------------- */
+  /* Spacing scale — matches the original 4px grid (Tailwind).      */
+  /* ------------------------------------------------------------- */
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-20: 5rem;
+
+  /* ------------------------------------------------------------- */
+  /* Borders — the whole design is held together by thick black     */
+  /* borders. These tokens are used for every box in the site.      */
+  /* ------------------------------------------------------------- */
+
+  --border-thin: 2px solid var(--color-black);
+  --border-medium: 4px solid var(--color-black);
+  --border-thick: 8px solid var(--color-black);
+  --border-bottom-thick: 4px solid var(--color-black);
+
+  /* ------------------------------------------------------------- */
+  /* Hard shadows — the offset "neobrutalist" drop.                  */
+  /* No blur, no opacity, just pure black offset.                   */
+  /* ------------------------------------------------------------- */
+
+  --shadow-medium: 8px 8px 0 0 var(--color-black);
+  --shadow-large: 12px 12px 0 0 var(--color-black);
+
+  /* ------------------------------------------------------------- */
+  /* Type scale — matches the original Tailwind sizes.              */
+  /* ------------------------------------------------------------- */
+
+  --font-family-base:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --text-7xl: 4.5rem;
+
+  /* ------------------------------------------------------------- */
+  /* Layout                                                           */
+  /* ------------------------------------------------------------- */
+
+  --container-narrow: 72rem;          /* 6xl — most sections */
+  --container-wide: 80rem;            /* 7xl — top nav */
+
+  /* ------------------------------------------------------------- */
+  /* Motion                                                           */
+  /* ------------------------------------------------------------- */
+
+  --transition-colors: color 150ms ease, background-color 150ms ease,
+    border-color 150ms ease;
+  --transition-transform: transform 150ms ease;
+}
