@@ -4,8 +4,13 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   // We want fully-static HTML output. No SSR runtime needed for this site.
   output: 'static',
-  // Single-page site — keep root index only.
-  trailingSlash: 'never',
+  // Two languages: Spanish at "/", English at "/en/".
+  // Components read the active one from Astro.currentLocale (see src/i18n).
+  i18n: {
+    defaultLocale: 'es',
+    locales: ['es', 'en'],
+    routing: { prefixDefaultLocale: false },
+  },
   // Friendly dev server defaults.
   server: {
     host: true,

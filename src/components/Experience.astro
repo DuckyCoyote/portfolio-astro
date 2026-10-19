@@ -12,23 +12,25 @@
  */
 
 import { experiences } from '../data/portfolio';
+import { getI18n } from '../i18n';
 import Window from './Window.astro';
 import PixelIcon from './PixelIcon.astro';
 
-const years = new Set(experiences.flatMap((job) => job.period.match(/\d{4}/g) ?? []));
+const { t, l } = getI18n(Astro);
+const years = new Set(experiences.flatMap((job) => l(job.period).match(/\d{4}/g) ?? []));
 const firstYear = Math.min(...[...years].map(Number));
 ---
 
 <section id="experience" class="section experience">
   <div class="container">
     <Window
-      title="Experiencia"
-      info={[`${experiences.length} puestos`, `Desde ${firstYear}`, 'Más reciente primero']}
+      title={t.experience.window}
+      info={[t.experience.jobs(experiences.length), t.experience.since(firstYear), t.experience.newestFirst]}
     >
       <div class="experience__columns" aria-hidden="true">
-        <span>Puesto</span>
-        <span class="md-only">Empresa</span>
-        <span class="md-only">Período</span>
+        <span>{t.experience.columns.role}</span>
+        <span class="md-only">{t.experience.columns.company}</span>
+        <span class="md-only">{t.experience.columns.period}</span>
       </div>
 
       <ul class="experience__list">
@@ -42,12 +44,12 @@ const firstYear = Math.min(...[...years].map(Number));
                   <h3 class="experience__title">{job.title}</h3>
                 </span>
                 <span class="experience__company">{job.company}</span>
-                <span class="experience__period">{job.period}</span>
+                <span class="experience__period">{l(job.period)}</span>
               </summary>
 
               <div class="experience__detail">
-                <p class="experience__description">{job.description}</p>
-                <ul class="experience__technologies" aria-label="Tecnologías">
+                <p class="experience__description">{l(job.description)}</p>
+                <ul class="experience__technologies" aria-label={t.experience.technologies}>
                   {job.technologies.map((tech) => <li class="tag">{tech}</li>)}
                 </ul>
               </div>

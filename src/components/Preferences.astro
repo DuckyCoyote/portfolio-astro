@@ -2,15 +2,19 @@
 /*
  * Panel de control — a native <dialog> dressed as a Mac dialog box.
  *
- * Two settings, both applied instantly and remembered in localStorage:
- *   • Apariencia: follow the OS, or force light / dark.
- *   • Fuente de la terminal: VT323 (CRT), IBM Plex Mono or JetBrains Mono.
+ * Three settings, all applied instantly and remembered in localStorage:
+ *   • Language: Spanish or English (switches to that version of the page).
+ *   • Appearance: follow the OS, or force light / dark.
+ *   • Terminal font: VT323 (CRT), IBM Plex Mono or JetBrains Mono.
  *
  * Opened from the duck menu; behavior lives in src/scripts/preferences.ts.
  */
 
 import PixelIcon from './PixelIcon.astro';
 import { THEME_OPTIONS, TERMINAL_FONT_OPTIONS } from '../scripts/preferences-options';
+import { getI18n, LOCALES, LANGUAGE_NAMES, localePath } from '../i18n';
+
+const { locale, t } = getI18n(Astro);
 ---
 
 <dialog class="dialog prefs" aria-labelledby="prefs-title" data-preferences>
@@ -18,23 +22,40 @@ import { THEME_OPTIONS, TERMINAL_FONT_OPTIONS } from '../scripts/preferences-opt
     <header class="prefs__head">
       <PixelIcon name="computer" scale={3} />
       <div>
-        <h2 class="prefs__title" id="prefs-title">Panel de control</h2>
-        <p class="prefs__lead">Los cambios se guardan en este navegador.</p>
+        <h2 class="prefs__title" id="prefs-title">{t.preferences.title}</h2>
+        <p class="prefs__lead">{t.preferences.lead}</p>
       </div>
     </header>
 
     <fieldset class="prefs__group">
-      <legend class="prefs__legend">Apariencia</legend>
-      {THEME_OPTIONS.map((option) => (
+      <legend class="prefs__legend">{t.preferences.language}</legend>
+      {LOCALES.map((option) => (
         <label class="radio">
-          <input type="radio" name="theme" value={option.value} data-pref-theme />
-          <span>{option.label}</span>
+          <input
+            type="radio"
+            name="language"
+            value={option}
+            checked={option === locale}
+            data-pref-lang
+            data-href={localePath(option)}
+          />
+          <span lang={option}>{LANGUAGE_NAMES[option]}</span>
         </label>
       ))}
     </fieldset>
 
     <fieldset class="prefs__group">
-      <legend class="prefs__legend">Fuente de la terminal</legend>
+      <legend class="prefs__legend">{t.preferences.appearance}</legend>
+      {THEME_OPTIONS.map((option) => (
+        <label class="radio">
+          <input type="radio" name="theme" value={option} data-pref-theme />
+          <span>{t.preferences.themes[option]}</span>
+        </label>
+      ))}
+    </fieldset>
+
+    <fieldset class="prefs__group">
+      <legend class="prefs__legend">{t.preferences.terminalFont}</legend>
       {TERMINAL_FONT_OPTIONS.map((option) => (
         <label class="radio prefs__font">
           <input type="radio" name="terminal-font" value={option.value} data-pref-font />
@@ -47,7 +68,7 @@ import { THEME_OPTIONS, TERMINAL_FONT_OPTIONS } from '../scripts/preferences-opt
     </fieldset>
 
     <div class="prefs__actions">
-      <button class="btn btn--default" value="close">Listo</button>
+      <button class="btn btn--default" value="close">{t.preferences.done}</button>
     </div>
   </form>
 </dialog>

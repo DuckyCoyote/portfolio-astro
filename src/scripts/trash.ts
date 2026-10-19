@@ -14,12 +14,12 @@
 
 import { zoomRects, motionAllowed } from './motion';
 import { STORAGE_KEYS } from './preferences-options';
+import { clientStrings } from '../i18n/client';
 
 const root = document.documentElement;
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-const DEFAULT_STATUS = 'Haz clic en un archivo para ver qué es.';
-const ACHIEVEMENT = '¡Cuac! Logro desbloqueado: mantenimiento preventivo.';
+const text = clientStrings().trash;
 
 /* ------------------------------------------------------------------ */
 /*  Storage                                                            */
@@ -100,12 +100,12 @@ function init(): void {
     emptyMessage.hidden = !emptied;
     emptyButton.hidden = emptied;
     restoreButton.hidden = !emptied;
-    if (itemCount) itemCount.textContent = `${emptied ? 0 : files.length} elementos`;
+    if (itemCount) itemCount.textContent = text.items(emptied ? 0 : files.length);
   };
 
   const selectFile = (file: HTMLButtonElement | null) => {
     files.forEach((other) => other.setAttribute('aria-pressed', String(other === file)));
-    status.textContent = file?.dataset.note ?? DEFAULT_STATUS;
+    status.textContent = file?.dataset.note ?? text.hint;
   };
 
   /* ---------- Desktop icon: click selects, double click opens ---------- */
@@ -158,7 +158,7 @@ function init(): void {
     emptied = true;
     saveEmptied(true);
     render();
-    status.textContent = ACHIEVEMENT;
+    status.textContent = text.achievement;
     restoreButton.focus();
   });
 

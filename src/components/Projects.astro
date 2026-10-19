@@ -7,12 +7,15 @@
  * greyscale to match the 1-bit desktop and get their colour back on hover
  * (only on devices that can hover, so touch screens always see colour).
  *
- * Projects whose links are still "#" are marked "En desarrollo" and their
+ * Projects whose links are still "#" are marked as in progress and their
  * buttons are dimmed like unavailable menu commands.
  */
 
 import { projects, FALLBACK_PROJECT_IMAGE } from '../data/portfolio';
+import { getI18n } from '../i18n';
 import Window from './Window.astro';
+
+const { t, l } = getI18n(Astro);
 
 const isLive = (url: string) => url !== '#';
 const liveCount = projects.filter((project) => isLive(project.link)).length;
@@ -21,11 +24,11 @@ const liveCount = projects.filter((project) => isLive(project.link)).length;
 <section id="projects" class="section">
   <div class="container">
     <Window
-      title="Proyectos"
+      title={t.projects.window}
       info={[
-        `${projects.length} proyectos`,
-        `${liveCount} publicados`,
-        `${projects.length - liveCount} en desarrollo`,
+        t.projects.total(projects.length),
+        t.projects.live(liveCount),
+        t.projects.inProgress(projects.length - liveCount),
       ]}
     >
       <ul class="projects__grid">
@@ -36,23 +39,23 @@ const liveCount = projects.filter((project) => isLive(project.link)).length;
             <li class="projects__card">
               <header class="projects__head">
                 <h3 class="projects__title">{project.title}</h3>
-                <span class="projects__status">{live ? 'Publicado' : 'En desarrollo'}</span>
+                <span class="projects__status">{live ? t.projects.statusLive : t.projects.statusInProgress}</span>
               </header>
 
               <div class="projects__image-wrap">
                 <img
                   class="projects__image"
                   src={project.image || FALLBACK_PROJECT_IMAGE}
-                  alt={`Captura del proyecto ${project.title}`}
+                  alt={t.projects.screenshot(project.title)}
                   loading="lazy"
                   decoding="async"
                 />
               </div>
 
               <div class="projects__body">
-                <p class="projects__description">{project.description}</p>
+                <p class="projects__description">{l(project.description)}</p>
 
-                <ul class="projects__technologies" aria-label="Tecnologías">
+                <ul class="projects__technologies" aria-label={t.experience.technologies}>
                   {project.technologies.map((tech) => <li class="tag">{tech}</li>)}
                 </ul>
 
@@ -64,7 +67,7 @@ const liveCount = projects.filter((project) => isLive(project.link)).length;
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Abrir
+                    {t.projects.open}
                   </a>
                   <a
                     class="btn flex-1"
@@ -73,7 +76,7 @@ const liveCount = projects.filter((project) => isLive(project.link)).length;
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Código
+                    {t.projects.code}
                   </a>
                 </div>
               </div>

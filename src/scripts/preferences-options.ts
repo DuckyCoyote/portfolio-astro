@@ -6,11 +6,15 @@
  * The CSS that reacts to them lives in styles/tokens.css:
  *   <html data-theme="light|dark">          (absent = follow the OS)
  *   <html data-term-font="plex|jetbrains">  (absent = VT323)
+ *
+ * The saved language sends visitors to their version of the page ("/" or
+ * "/en/") before it paints. Option labels live in src/i18n/ui.ts.
  */
 
 export const STORAGE_KEYS = {
   theme: 'pref-theme',
   terminalFont: 'pref-terminal-font',
+  language: 'pref-language',
   trash: 'trash-emptied',   // not a preference, but read before paint too
 } as const;
 
@@ -20,11 +24,7 @@ export type TerminalFont = 'vt323' | 'plex' | 'jetbrains';
 export const DEFAULT_THEME: Theme = 'system';
 export const DEFAULT_TERMINAL_FONT: TerminalFont = 'vt323';
 
-export const THEME_OPTIONS: { value: Theme; label: string }[] = [
-  { value: 'system', label: 'Automático (como el sistema)' },
-  { value: 'light',  label: 'Claro' },
-  { value: 'dark',   label: 'Oscuro' },
-];
+export const THEME_OPTIONS: Theme[] = ['system', 'light', 'dark'];
 
 export const TERMINAL_FONT_OPTIONS: {
   value: TerminalFont;

@@ -9,18 +9,21 @@
  */
 
 import { aboutContent, siteMeta, heroContent } from '../data/portfolio';
+import { getI18n } from '../i18n';
 import Window from './Window.astro';
 import PixelIcon from './PixelIcon.astro';
+
+const { t, l } = getI18n(Astro);
 ---
 
 <section id="about" class="section">
   <div class="container">
-    <Window title={aboutContent.title} info={[siteMeta.author, aboutContent.level]}>
+    <Window title={l(aboutContent.title)} info={[siteMeta.author, aboutContent.level]}>
       <div class="about__grid">
 
         <article class="about__story">
-          <h3 class="about__story-title">Mi historia</h3>
-          {aboutContent.paragraphs.map((paragraph) => (
+          <h3 class="about__story-title">{t.about.story}</h3>
+          {l(aboutContent.paragraphs).map((paragraph) => (
             <p class="about__paragraph">{paragraph}</p>
           ))}
         </article>
@@ -30,19 +33,19 @@ import PixelIcon from './PixelIcon.astro';
             <PixelIcon name="computer" scale={3} />
             <div>
               <h3 class="about__info-name" id="about-info-title">Alejo</h3>
-              <p class="about__info-kind">Información</p>
+              <p class="about__info-kind">{t.about.info}</p>
             </div>
           </header>
 
           <dl class="about__facts">
             {aboutContent.facts.map((fact) => (
               <div class="about__fact">
-                <dt>{fact.label}:</dt>
-                <dd>{fact.value}</dd>
+                <dt>{l(fact.label)}:</dt>
+                <dd>{l(fact.value)}</dd>
               </div>
             ))}
             <div class="about__fact">
-              <dt>Nivel:</dt>
+              <dt>{t.about.level}:</dt>
               <dd>
                 {aboutContent.level}
                 <div
@@ -51,7 +54,7 @@ import PixelIcon from './PixelIcon.astro';
                   aria-valuemin="0"
                   aria-valuemax="100"
                   aria-valuenow={aboutContent.levelProgress}
-                  aria-label={`Experiencia: ${aboutContent.levelLabel}`}
+                  aria-label={t.about.meter(aboutContent.levelLabel)}
                 >
                   <span class="about__meter-fill" style={`width: ${aboutContent.levelProgress}%;`}></span>
                 </div>
@@ -60,7 +63,7 @@ import PixelIcon from './PixelIcon.astro';
             </div>
           </dl>
 
-          <p class="about__info-note">{heroContent.status}</p>
+          <p class="about__info-note">{l(heroContent.status)}</p>
         </aside>
 
       </div>

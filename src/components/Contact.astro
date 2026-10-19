@@ -11,9 +11,11 @@
  */
 
 import { socialLinks, contactPhone, contactIntro, contactEmail } from '../data/portfolio';
+import { getI18n } from '../i18n';
 import Window from './Window.astro';
 import PixelIcon from './PixelIcon.astro';
 
+const { t, l } = getI18n(Astro);
 const MESSAGE_MAX = 1000;
 const PROMPT = 'alejo@portfolio:~$';
 const KEY_WIDTH = 10;
@@ -28,8 +30,8 @@ const pad = (key: string) => key.padEnd(KEY_WIDTH, ' ');
       <header class="contact__head">
         <PixelIcon name="mail" scale={3} />
         <div>
-          <h2 class="contact__title">Contacto</h2>
-          <p class="contact__lead">Envíame un mensaje y te respondo por email.</p>
+          <h2 class="contact__title">{t.contact.title}</h2>
+          <p class="contact__lead">{t.contact.lead}</p>
         </div>
       </header>
 
@@ -41,7 +43,7 @@ const pad = (key: string) => key.padEnd(KEY_WIDTH, ' ');
         data-contact-form
       >
         <div class="field">
-          <label class="field__label" for="contact-name">Nombre</label>
+          <label class="field__label" for="contact-name">{t.contact.name}</label>
           <input
             class="field__input"
             type="text"
@@ -51,13 +53,13 @@ const pad = (key: string) => key.padEnd(KEY_WIDTH, ' ');
             minlength="2"
             maxlength="100"
             autocomplete="name"
-            placeholder="Tu nombre"
+            placeholder={t.contact.namePlaceholder}
             data-contact-name
           />
         </div>
 
         <div class="field">
-          <label class="field__label" for="contact-email">Email</label>
+          <label class="field__label" for="contact-email">{t.contact.email}</label>
           <input
             class="field__input"
             type="email"
@@ -65,14 +67,14 @@ const pad = (key: string) => key.padEnd(KEY_WIDTH, ' ');
             name="email"
             required
             autocomplete="email"
-            placeholder="tu@email.com"
+            placeholder={t.contact.emailPlaceholder}
             data-contact-email
           />
         </div>
 
         <div class="field">
           <label class="field__label" for="contact-message">
-            Mensaje
+            {t.contact.message}
             <span class="field__hint"><span data-contact-counter>0</span>/{MESSAGE_MAX}</span>
           </label>
           <textarea
@@ -83,7 +85,7 @@ const pad = (key: string) => key.padEnd(KEY_WIDTH, ' ');
             minlength="10"
             maxlength={MESSAGE_MAX}
             rows="5"
-            placeholder="Cuéntame tu idea (mínimo 10 caracteres)"
+            placeholder={t.contact.messagePlaceholder}
             data-contact-message
           ></textarea>
         </div>
@@ -99,21 +101,21 @@ const pad = (key: string) => key.padEnd(KEY_WIDTH, ' ');
         ></div>
 
         <div class="contact__actions">
-          <button class="btn" type="reset">Borrar</button>
+          <button class="btn" type="reset">{t.contact.clear}</button>
           <button class="btn btn--default" type="submit" data-contact-submit>
-            <span data-contact-submit-label>Enviar mensaje</span>
+            <span data-contact-submit-label>{t.form.send}</span>
           </button>
         </div>
       </form>
     </div>
 
     {/* ============== Terminal: details ============== */}
-    <Window title="contacto.sh" titleAs="span" variant="terminal" class="contact__terminal">
+    <Window title={t.contact.terminal} titleAs="span" variant="terminal" class="contact__terminal">
       <div class="contact__session" data-typewriter>
-      <p class="term-line" data-kind="cmd"><span class="term-prompt">{PROMPT} </span><span data-text>cat léeme.txt</span></p>
-      <p class="term-line term-dim contact__intro"># {contactIntro}</p>
+      <p class="term-line" data-kind="cmd"><span class="term-prompt">{PROMPT} </span><span data-text>cat {t.contact.readme}</span></p>
+      <p class="term-line term-dim contact__intro"># {l(contactIntro)}</p>
 
-      <p class="term-line" data-kind="cmd"><span class="term-prompt">{PROMPT} </span><span data-text>contacto --list</span></p>
+      <p class="term-line" data-kind="cmd"><span class="term-prompt">{PROMPT} </span><span data-text>{t.contact.listCommand}</span></p>
       <dl class="contact__list" data-stagger>
         {socialLinks.map((link) => (
           <div class="term-line">
@@ -128,14 +130,14 @@ const pad = (key: string) => key.padEnd(KEY_WIDTH, ' ');
           </div>
         ))}
         <div class="term-line">
-          <dt>{pad('teléfono')}</dt>
+          <dt>{pad(t.contact.phone)}</dt>
           <dd>{contactPhone}</dd>
         </div>
       </dl>
 
       <p class="term-line" data-kind="cmd"><span class="term-prompt">{PROMPT} </span><span data-text>status</span></p>
       <p class="term-line contact__status">
-        <span class="contact__led" aria-hidden="true"></span> Disponible
+        <span class="contact__led" aria-hidden="true"></span> {t.contact.available}
       </p>
 
       <p class="term-line"><span class="term-prompt">{PROMPT}</span> <span class="term-cursor" aria-hidden="true"></span></p>

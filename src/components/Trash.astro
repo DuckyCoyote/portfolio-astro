@@ -4,7 +4,7 @@
  *
  * Behaves like the Finder's trash: one click selects the icon, a double
  * click (or Enter) opens it. Inside is a window of "deleted" files; picking
- * one shows its story in the status strip. "Vaciar papelera" asks for
+ * one shows its story in the status strip. Emptying it asks for
  * confirmation with a classic alert, then empties it with a quack.
  * The emptied state is remembered; a later visit can restore the files.
  *
@@ -12,6 +12,7 @@
  */
 
 import { trashItems } from '../data/portfolio';
+import { getI18n } from '../i18n';
 import Window from './Window.astro';
 import PixelIcon from './PixelIcon.astro';
 
@@ -20,52 +21,53 @@ interface Props {
 }
 
 const { class: className = '' } = Astro.props;
+const { t, l } = getI18n(Astro);
 ---
 
 <button
   type="button"
   class:list={['desk-icon', 'trash__icon', className]}
-  aria-label="Papelera (doble clic para abrir)"
+  aria-label={t.trashUi.open}
   aria-haspopup="dialog"
   data-trash-icon
 >
   <PixelIcon name="trash-full" scale={3} class="trash__glyph trash__glyph--full" />
   <PixelIcon name="trash" scale={3} class="trash__glyph trash__glyph--empty" />
-  <span class="desk-icon__label">Papelera</span>
+  <span class="desk-icon__label">{t.trashUi.name}</span>
 </button>
 
 <dialog class="trash" aria-labelledby="trash-title" data-trash-dialog>
   <Window
-    title="Papelera"
+    title={t.trashUi.name}
     titleAs="span"
     zoom={false}
     closable
-    info={[`${trashItems.length} elementos`, '12K en disco', '∞ lecciones aprendidas']}
+    info={[t.trash.items(trashItems.length), t.trashUi.disk, t.trashUi.lessons]}
     class="trash__window"
   >
-    <h2 class="visually-hidden" id="trash-title">Papelera</h2>
+    <h2 class="visually-hidden" id="trash-title">{t.trashUi.name}</h2>
 
     <ul class="trash__files" data-trash-files>
       {trashItems.map((item) => (
         <li>
-          <button type="button" class="desk-icon trash__file" data-note={item.note}>
+          <button type="button" class="desk-icon trash__file" data-note={l(item.note)}>
             <PixelIcon name={item.icon} scale={3} />
-            <span class="desk-icon__label">{item.name}</span>
+            <span class="desk-icon__label">{l(item.name)}</span>
           </button>
         </li>
       ))}
     </ul>
 
     <p class="trash__empty" data-trash-empty-message hidden>
-      La papelera está vacía. Como mi lista de bugs… casi.
+      {t.trashUi.empty}
     </p>
 
     <div class="trash__footer">
       <p class="trash__status" role="status" aria-live="polite" data-trash-status>
-        Haz clic en un archivo para ver qué es.
+        {t.trash.hint}
       </p>
-      <button type="button" class="btn btn--default" data-trash-empty>Vaciar papelera</button>
-      <button type="button" class="btn" data-trash-restore hidden>Restaurar archivos</button>
+      <button type="button" class="btn btn--default" data-trash-empty>{t.trashUi.emptyButton}</button>
+      <button type="button" class="btn" data-trash-restore hidden>{t.trashUi.restore}</button>
     </div>
   </Window>
 </dialog>
@@ -74,14 +76,14 @@ const { class: className = '' } = Astro.props;
   <form method="dialog" class="trash-alert__body">
     <span class="trash-alert__mark" aria-hidden="true">!</span>
     <div>
-      <h2 class="trash-alert__title" id="trash-alert-title">¿Vaciar la Papelera?</h2>
+      <h2 class="trash-alert__title" id="trash-alert-title">{t.trashUi.alertTitle}</h2>
       <p id="trash-alert-text">
-        Se eliminarán {trashItems.length} elementos para siempre. Bueno… siguen en el historial de git.
+        {t.trashUi.alertText(trashItems.length)}
       </p>
     </div>
     <div class="trash-alert__actions">
-      <button class="btn" value="cancel">Cancelar</button>
-      <button class="btn btn--default" value="confirm">Vaciar</button>
+      <button class="btn" value="cancel">{t.trashUi.cancel}</button>
+      <button class="btn btn--default" value="confirm">{t.trashUi.confirm}</button>
     </div>
   </form>
 </dialog>

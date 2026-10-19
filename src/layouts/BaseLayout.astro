@@ -19,6 +19,13 @@ import '../styles/utilities.css';
 
 import { siteMeta } from '../data/portfolio';
 import { STORAGE_KEYS, TERMINAL_FONT_OPTIONS, DEFAULT_TERMINAL_FONT } from '../scripts/preferences-options';
+import { getI18n, LOCALES, localePath } from '../i18n';
+
+const { locale, l } = getI18n(Astro);
+const languagePaths = Object.fromEntries(LOCALES.map((option) => [option, localePath(option)]));
+/* hreflang wants absolute URLs; they become absolute once `site` is set in
+   astro.config.mjs. */
+const alternateUrl = (path: string) => (Astro.site ? new URL(path, Astro.site).href : path);
 
 const altTerminalFonts = TERMINAL_FONT_OPTIONS
   .map((option) => option.value)
@@ -29,11 +36,11 @@ interface Props {
   description?: string;
 }
 
-const { title = siteMeta.title, description = siteMeta.description } = Astro.props;
+const { title = l(siteMeta.title), description = l(siteMeta.description) } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={locale}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -45,11 +52,23 @@ const { title = siteMeta.title, description = siteMeta.description } = Astro.pro
     <meta property="og:title"       content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type"        content="website" />
+    <meta property="og:locale"      content={locale === 'es' ? 'es_ES' : 'en_GB'} />
+
+    {LOCALES.map((option) => (
+      <link rel="alternate" hreflang={option} href={alternateUrl(localePath(option))} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={alternateUrl(localePath('es'))} />
 
     {/* Apply saved preferences before first paint so the page never flashes
         the wrong theme. The controls live in src/scripts/preferences.ts. */}
-    <script is:inline define:vars={{ keys: STORAGE_KEYS, altTerminalFonts }}>
+    <script is:inline define:vars={{ keys: STORAGE_KEYS, altTerminalFonts, languagePaths }}>
       try {
+        // A saved language other than this page's: go to that version now.
+        const language = localStorage.getItem(keys.language);
+        if (language in languagePaths && language !== document.documentElement.lang) {
+          location.replace(languagePaths[language] + location.hash);
+        }
+
         const theme = localStorage.getItem(keys.theme);
         if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
         const font = localStorage.getItem(keys.terminalFont);
@@ -72,6 +91,8 @@ const { title = siteMeta.title, description = siteMeta.description } = Astro.pro
 
     {/* Duck menu + menu bar clock — tiny inline script, no framework needed. */}
     <script>
+      import { clientStrings } from '../i18n/client';
+
       const menuButton = document.querySelector<HTMLButtonElement>('[data-menu-button]');
       const menu = document.querySelector<HTMLElement>('[data-menu]');
 
@@ -117,7 +138,7 @@ const { title = siteMeta.title, description = siteMeta.description } = Astro.pro
 
       const clock = document.querySelector<HTMLTimeElement>('[data-clock]');
       if (clock) {
-        const format = new Intl.DateTimeFormat('es-ES', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+        const format = new Intl.DateTimeFormat(clientStrings().dateLocale, { weekday: 'short', hour: '2-digit', minute: '2-digit' });
         const tick = () => {
           const now = new Date();
           clock.textContent = format.format(now);

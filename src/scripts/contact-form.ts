@@ -19,6 +19,7 @@
  * flow of `init()` reads like an English description of the workflow.
  */
 
+import { clientStrings } from '../i18n/client';
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -37,6 +38,9 @@ const TEMPLATE_ID = import.meta.env.PUBLIC_EMAILJS_TEMPLATE_ID ?? 'YOUR_TEMPLATE
 const PUBLIC_KEY  = import.meta.env.PUBLIC_EMAILJS_PUBLIC_KEY  ?? 'YOUR_PUBLIC_KEY';
 
 const TO_EMAIL = 'daniel_719021@hotmail.es';
+
+/* Banner and button text in the page's language (src/i18n/client.ts). */
+const text = clientStrings().form;
 
 /* ------------------------------------------------------------------ */
 /*  DOM lookups                                                        */
@@ -191,9 +195,9 @@ function init(): void {
     const { remaining } = readCooldown();
     if (remaining > 0) {
       const seconds = Math.ceil(remaining / 1000);
-      setSubmitLabel(submit, submitLabel, `Espera ${seconds}s`, true);
+      setSubmitLabel(submit, submitLabel, text.wait(seconds), true);
     } else {
-      setSubmitLabel(submit, submitLabel, 'Enviar mensaje', false);
+      setSubmitLabel(submit, submitLabel, text.send, false);
     }
   };
   tickCooldown();
@@ -213,7 +217,7 @@ function init(): void {
       showBanner(
         banner,
         'limit',
-        `Has alcanzado el límite diario de mensajes (${MAX_ATTEMPTS_PER_DAY})`,
+        text.limit(MAX_ATTEMPTS_PER_DAY),
       );
       return;
     }
@@ -222,7 +226,7 @@ function init(): void {
     if (isWithinCooldown()) {
       const { remaining } = readCooldown();
       const seconds = Math.ceil(remaining / 1000);
-      showBanner(banner, 'cooldown', `Espera ${seconds}s antes de enviar otro mensaje`);
+      showBanner(banner, 'cooldown', text.cooldown(seconds));
       tickCooldown();
       return;
     }
@@ -232,14 +236,14 @@ function init(): void {
       showBanner(
         banner,
         'error',
-        'Error al enviar. Verifica que el mensaje sea válido.',
+        text.invalid,
       );
       window.setTimeout(() => hideBanner(banner), 5000);
       return;
     }
 
     // 4) Send via EmailJS
-    setSubmitLabel(submit, submitLabel, 'Enviando…', true);
+    setSubmitLabel(submit, submitLabel, text.sending, true);
 
     try {
       const { default: emailjs } = await import('@emailjs/browser');
@@ -262,13 +266,13 @@ function init(): void {
       // Reset first: the reset handler hides the banner, so show it after.
       form.reset();
       updateCounter();
-      showBanner(banner, 'success', '¡Mensaje enviado exitosamente!');
+      showBanner(banner, 'success', text.success);
       tickCooldown();
       window.setTimeout(() => hideBanner(banner), 5000);
     } catch (err) {
       console.error('Error al enviar el mensaje:', err);
-      showBanner(banner, 'error', `No se pudo enviar. Inténtalo de nuevo o escríbeme a ${TO_EMAIL}.`);
-      setSubmitLabel(submit, submitLabel, 'Enviar mensaje', false);
+      showBanner(banner, 'error', text.failed(TO_EMAIL));
+      setSubmitLabel(submit, submitLabel, text.send, false);
       window.setTimeout(() => hideBanner(banner), 5000);
     }
   });

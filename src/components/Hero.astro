@@ -16,25 +16,29 @@
  * desktop renders complete and still.
  */
 
-import { heroContent, siteMeta } from '../data/portfolio';
+import { heroContent, siteMeta, navItems } from '../data/portfolio';
+import { getI18n } from '../i18n';
 import Window from './Window.astro';
 import PixelIcon from './PixelIcon.astro';
 import Trash from './Trash.astro';
 import type { PixelIconName } from './PixelIcon.astro';
 
+const { t, l } = getI18n(Astro);
+const sectionLabel = (href: string) => l(navItems.find((item) => item.href === href)!.label);
+
 const deskIcons: { label: string; href: string; icon: PixelIconName; external?: boolean }[] = [
-  { label: 'Proyectos',   href: '#projects',   icon: 'folder' },
-  { label: 'Experiencia', href: '#experience', icon: 'document' },
-  { label: 'Contacto',    href: '#contact',    icon: 'mail' },
-  { label: 'GitHub',      href: 'https://github.com/DuckyCoyote', icon: 'disk', external: true },
+  { label: sectionLabel('#projects'),   href: '#projects',   icon: 'folder' },
+  { label: sectionLabel('#experience'), href: '#experience', icon: 'document' },
+  { label: sectionLabel('#contact'),    href: '#contact',    icon: 'mail' },
+  { label: 'GitHub', href: 'https://github.com/DuckyCoyote', icon: 'disk', external: true },
 ];
 
 const PROMPT = 'alejo@portfolio:~$';
 const terminalLines = [
   { kind: 'cmd', text: 'whoami' },
   { kind: 'out', text: `${siteMeta.author}, ${heroContent.role}` },
-  { kind: 'cmd', text: 'cat estado.txt' },
-  { kind: 'out', text: heroContent.status },
+  { kind: 'cmd', text: `cat ${t.hero.statusFile}` },
+  { kind: 'out', text: l(heroContent.status) },
 ] as const;
 ---
 
@@ -43,29 +47,29 @@ const terminalLines = [
 
     <div class="hero__windows">
       <Window
-        title="Léeme"
+        title={t.hero.window}
         titleAs="span"
-        info={[heroContent.role, 'Disponible']}
+        info={[heroContent.role, t.hero.available]}
         class="hero__readme"
       >
         <h1 class="hero__heading">
-          <span class="hero__line">{heroContent.greeting}</span>
-          <span class="hero__line">{heroContent.name}</span>
+          <span class="hero__line">{l(heroContent.greeting)}</span>
+          <span class="hero__line">{l(heroContent.name)}</span>
         </h1>
 
-        <p class="hero__tagline">{heroContent.tagline}</p>
+        <p class="hero__tagline">{l(heroContent.tagline)}</p>
 
         <div class="hero__actions">
           <a class="btn btn--default" href={heroContent.primaryCta.href}>
-            {heroContent.primaryCta.label}
+            {l(heroContent.primaryCta.label)}
           </a>
           <a class="btn" href={heroContent.secondaryCta.href}>
-            {heroContent.secondaryCta.label}
+            {l(heroContent.secondaryCta.label)}
           </a>
         </div>
       </Window>
 
-      <Window title="Terminal" titleAs="span" variant="terminal" class="hero__terminal">
+      <Window title={t.hero.terminal} titleAs="span" variant="terminal" class="hero__terminal">
         <div data-typewriter>
           {terminalLines.map((line) => (
             /* One line on purpose: .term-line preserves whitespace. */
@@ -76,7 +80,7 @@ const terminalLines = [
       </Window>
     </div>
 
-    <nav class="hero__icons" aria-label="Accesos directos">
+    <nav class="hero__icons" aria-label={t.hero.shortcuts}>
       {deskIcons.map((item) => (
         <a
           class="desk-icon"

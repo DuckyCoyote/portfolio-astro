@@ -22,6 +22,8 @@
  * for the owner's script to handle.
  */
 
+import { getI18n } from '../i18n';
+
 interface Props {
   title: string;
   titleAs?: 'h1' | 'h2' | 'h3' | 'span';
@@ -43,12 +45,14 @@ const {
   closable = false,
   ...attrs
 } = Astro.props;
+
+const { t } = getI18n(Astro);
 ---
 
 <div class:list={['window', variant === 'terminal' && 'window--terminal', className]} data-zoom={zoom ? '' : undefined} {...attrs}>
   <div class="window__titlebar">
     {closable
-      ? <button type="button" class="window__box window__box--close" aria-label="Cerrar ventana" data-window-close></button>
+      ? <button type="button" class="window__box window__box--close" aria-label={t.window.close} data-window-close></button>
       : <span class="window__box window__box--close" aria-hidden="true"></span>}
     <TitleTag class="window__title">{title}</TitleTag>
     <span class="window__box window__box--zoom" aria-hidden="true"></span>

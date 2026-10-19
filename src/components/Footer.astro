@@ -2,10 +2,14 @@
 /*
  * Site footer — a thin white strip, like the bottom edge of a window.
  */
+
+import { getI18n } from '../i18n';
+
+const { t } = getI18n(Astro);
 ---
 
 <footer class="site-footer">
-  <p>© 2026 Alejo. Hecho con ❤️ y píxeles.</p>
+  <p>{t.footer}</p>
 </footer>
 
 <style>

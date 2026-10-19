@@ -1,5 +1,5 @@
 /*
- * Preferences controller — theme + terminal font.
+ * Preferences controller — language, theme and terminal font.
  *
  * The saved values are already applied before first paint by the inline
  * script in BaseLayout.astro (so there is no flash of the wrong theme).
@@ -8,8 +8,11 @@
  *   1. The radios in the Panel de control dialog.
  *   2. The sun/moon toggle in the menu bar (flips light ↔ dark).
  *   3. The "Panel de control…" entry in the duck menu that opens the dialog.
+ *   4. The language switch (menu bar link + Control Panel radios), which
+ *      saves the choice and opens the other version at the same section.
  *
- * Every change is applied to <html> immediately and saved to localStorage.
+ * Theme and font changes apply to <html> immediately; all three are saved
+ * to localStorage.
  */
 
 import {
@@ -21,6 +24,7 @@ import {
   type Theme,
   type TerminalFont,
 } from './preferences-options';
+import { clientStrings } from '../i18n/client';
 
 const root = document.documentElement;
 const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -46,7 +50,7 @@ function save(key: string, value: string): void {
 }
 
 const isTheme = (value: string | null): value is Theme =>
-  THEME_OPTIONS.some((option) => option.value === value);
+  THEME_OPTIONS.includes(value as Theme);
 
 const isTerminalFont = (value: string | null): value is TerminalFont =>
   TERMINAL_FONT_OPTIONS.some((option) => option.value === value);
@@ -91,9 +95,9 @@ function init(): void {
   const syncThemeControls = () => {
     themeRadios.forEach((radio) => (radio.checked = radio.value === theme));
     if (toggle) {
-      const next = effectiveTheme() === 'dark' ? 'claro' : 'oscuro';
-      toggle.setAttribute('aria-label', `Cambiar a tema ${next}`);
-      toggle.title = `Tema ${next}`;
+      const label = clientStrings().theme.switchTo(effectiveTheme() === 'dark' ? 'light' : 'dark');
+      toggle.setAttribute('aria-label', label);
+      toggle.title = label;
     }
   };
 
@@ -124,6 +128,23 @@ function init(): void {
   darkQuery.addEventListener('change', syncThemeControls);
 
   openButton?.addEventListener('click', () => dialog?.showModal());
+
+  // Language: remember the choice and land on the same section over there.
+  const switchLanguage = (language: string, href: string) => {
+    save(STORAGE_KEYS.language, language);
+    window.location.href = href + window.location.hash;
+  };
+
+  document.querySelectorAll<HTMLAnchorElement>('[data-lang-switch]').forEach((link) =>
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      switchLanguage(link.dataset.langSwitch!, link.getAttribute('href')!);
+    }),
+  );
+
+  document.querySelectorAll<HTMLInputElement>('[data-pref-lang]').forEach((radio) =>
+    radio.addEventListener('change', () => switchLanguage(radio.value, radio.dataset.href!)),
+  );
 
   syncThemeControls();
 }

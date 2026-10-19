@@ -9,7 +9,10 @@
  */
 
 import { skillCategories, skillStats, heroContent } from '../data/portfolio';
+import { getI18n } from '../i18n';
 import Window from './Window.astro';
+
+const { t, l } = getI18n(Astro);
 
 const PROMPT = 'alejo@portfolio:~/skills$';
 
@@ -20,14 +23,14 @@ ___( o)>
  '---'`.slice(1);
 
 const fetchRows = [
-  { key: 'Rol', value: heroContent.role },
-  ...skillStats.map((stat) => ({ key: stat.label, value: stat.value })),
+  { key: t.skills.role, value: heroContent.role },
+  ...skillStats.map((stat) => ({ key: l(stat.label), value: stat.value })),
 ];
 ---
 
 <section id="skills" class="section skills">
   <div class="container">
-    <Window title="Skills y tecnologías" variant="terminal">
+    <Window title={t.skills.window} variant="terminal">
 
       <div class="skills__session" data-typewriter>
       <p class="term-line" data-kind="cmd"><span class="term-prompt">{PROMPT} </span><span data-text>neofetch</span></p>
@@ -62,7 +65,7 @@ const fetchRows = [
       <div class="skills__grid" data-stagger>
         {skillCategories.map((category) => (
           <div class="tui-box">
-            <h3 class="tui-box__title">{category.title}</h3>
+            <h3 class="tui-box__title">{l(category.title)}</h3>
             <ul class="skills__list">
               {category.skills.map((skill) => (
                 <li><span class="term-dim" aria-hidden="true">›</span> {skill}</li>

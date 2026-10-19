@@ -5,20 +5,24 @@
  * The pixel duck plays the role of the Apple menu: it opens a pull-down
  * with every section plus external links. On desktop the sections are
  * also listed inline as menu titles; on mobile the duck menu is the whole
- * navigation. On the right: a sun/moon theme toggle and a clock, like the
- * menu bar extras of later System versions.
+ * navigation. On the right: the language switcher (like System 7's script
+ * menu), a sun/moon theme toggle and a clock.
  *
  * Open/close and the clock are handled by the script in BaseLayout.astro;
- * the theme toggle and "Panel de control…" by src/scripts/preferences.ts.
+ * the theme toggle, language switch and Control Panel entry by
+ * src/scripts/preferences.ts.
  */
 
 import { navItems, socialLinks } from '../data/portfolio';
+import { getI18n, localePath } from '../i18n';
 import PixelIcon from './PixelIcon.astro';
 
+const { locale, t, l } = getI18n(Astro);
+const otherLocale = locale === 'es' ? 'en' : 'es';
 const externalLinks = socialLinks.filter((link) => link.url.startsWith('http'));
 ---
 
-<nav class="menubar" aria-label="Principal">
+<nav class="menubar" aria-label={t.nav.label}>
   <div class="menubar__inner">
     <div class="menubar__apple">
       <button
@@ -34,11 +38,11 @@ const externalLinks = socialLinks.filter((link) => link.url.startsWith('http'));
       </button>
 
       <div class="menubar__dropdown" id="duck-menu" data-menu hidden>
-        <a class="menubar__entry" href="#about">Acerca de Alejo…</a>
-        <button type="button" class="menubar__entry" data-open-preferences>Panel de control…</button>
+        <a class="menubar__entry" href="#about">{t.nav.about}</a>
+        <button type="button" class="menubar__entry" data-open-preferences>{t.nav.controlPanel}</button>
         <hr class="menubar__sep" />
         {navItems.map((item) => (
-          <a class="menubar__entry" href={item.href}>{item.label}</a>
+          <a class="menubar__entry" href={item.href}>{l(item.label)}</a>
         ))}
         <hr class="menubar__sep" />
         {externalLinks.map((link) => (
@@ -51,16 +55,28 @@ const externalLinks = socialLinks.filter((link) => link.url.startsWith('http'));
 
     <ul class="menubar__titles md-only">
       {navItems.filter((item) => item.href !== '#hero').map((item) => (
-        <li><a class="menubar__item" href={item.href}>{item.label}</a></li>
+        <li><a class="menubar__item" href={item.href}>{l(item.label)}</a></li>
       ))}
     </ul>
 
-    <button type="button" class="menubar__item menubar__theme" data-theme-toggle aria-label="Cambiar tema">
+    <a
+      class="menubar__item menubar__lang"
+      href={localePath(otherLocale)}
+      hreflang={otherLocale}
+      lang={otherLocale}
+      title={t.nav.switchLanguage}
+      aria-label={t.nav.switchLanguage}
+      data-lang-switch={otherLocale}
+    >
+      {otherLocale.toUpperCase()}
+    </a>
+
+    <button type="button" class="menubar__item menubar__theme" data-theme-toggle aria-label={t.theme.switchTo('dark')}>
       <PixelIcon name="moon" scale={2} class="menubar__moon" />
       <PixelIcon name="sun" scale={2} class="menubar__sun" />
     </button>
 
-    <time class="menubar__clock" data-clock aria-label="Hora local"></time>
+    <time class="menubar__clock" data-clock aria-label={t.nav.clock}></time>
   </div>
 </nav>
 
@@ -120,10 +136,13 @@ const externalLinks = socialLinks.filter((link) => link.url.startsWith('http'));
     font-weight: 700;
   }
 
-  /* Shows the theme you'd switch to: a moon in light mode, a sun in dark. */
-  .menubar__theme {
+  /* Language switcher: shows the language you'd switch to. */
+  .menubar__lang {
     margin-left: auto;
+    font-weight: 700;
   }
+
+  /* Shows the theme you'd switch to: a moon in light mode, a sun in dark. */
 
   /* The icons are PixelIcon children, so they're reached via :global. */
   .menubar__theme :global(.menubar__sun) { display: none; }

@@ -1,34 +1,6 @@
 ---
-/*
- * Home page.
- *
- * The page is just the seven sections stacked top-to-bottom in the order
- * a visitor should see them. Astro will render them all statically at
- * build time — there is no per-request work.
- */
-
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Navigation from '../components/Navigation.astro';
-import Hero from '../components/Hero.astro';
-import About from '../components/About.astro';
-import Skills from '../components/Skills.astro';
-import Experience from '../components/Experience.astro';
-import Projects from '../components/Projects.astro';
-import Contact from '../components/Contact.astro';
-import Footer from '../components/Footer.astro';
-import Preferences from '../components/Preferences.astro';
+/* Home page in Spanish (default language). Content: HomePage.astro. */
+import HomePage from '../components/HomePage.astro';
 ---
 
-<BaseLayout>
-  <Navigation />
-  <main>
-    <Hero />
-    <About />
-    <Skills />
-    <Experience />
-    <Projects />
-    <Contact />
-  </main>
-  <Footer />
-  <Preferences />
-</BaseLayout>
+<HomePage />
