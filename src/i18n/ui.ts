@@ -15,6 +15,7 @@ const es = {
     controlPanel: 'Panel de control…',
     clock: 'Hora local',
     switchLanguage: 'Ver en inglés',
+    desktops: 'Escritorios',
   },
   hero: {
     window: 'Léeme',
@@ -89,6 +90,9 @@ const es = {
     appearance: 'Apariencia',
     themes: { system: 'Automático (como el sistema)', light: 'Claro', dark: 'Oscuro' },
     terminalFont: 'Fuente de la terminal',
+    scrolling: 'Desplazamiento',
+    scrollModes: { desktops: 'Escritorios virtuales', continuous: 'Página continua' },
+    scrollingHint: 'Solo en pantallas grandes.',
     done: 'Listo',
   },
   window: {
@@ -107,6 +111,7 @@ const en: UiStrings = {
     controlPanel: 'Control Panel…',
     clock: 'Local time',
     switchLanguage: 'Ver en español',
+    desktops: 'Desktops',
   },
   hero: {
     window: 'Read Me',
@@ -181,6 +186,9 @@ const en: UiStrings = {
     appearance: 'Appearance',
     themes: { system: 'Automatic (match system)', light: 'Light', dark: 'Dark' },
     terminalFont: 'Terminal font',
+    scrolling: 'Scrolling',
+    scrollModes: { desktops: 'Virtual desktops', continuous: 'Continuous page' },
+    scrollingHint: 'Large screens only.',
     done: 'Done',
   },
   window: {

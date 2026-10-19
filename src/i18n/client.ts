@@ -27,6 +27,7 @@ const es = {
   theme: {
     switchTo: (theme: 'light' | 'dark') => `Cambiar a tema ${theme === 'dark' ? 'oscuro' : 'claro'}`,
   },
+  desktop: (number: number) => `Escritorio ${number}`,
 };
 
 export type ClientStrings = typeof es;
@@ -51,6 +52,7 @@ const en: ClientStrings = {
   theme: {
     switchTo: (theme) => `Switch to ${theme} theme`,
   },
+  desktop: (number) => `Desktop ${number}`,
 };
 
 export const CLIENT_STRINGS = { es, en } as const;

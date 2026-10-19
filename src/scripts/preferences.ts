@@ -19,10 +19,13 @@ import {
   STORAGE_KEYS,
   DEFAULT_THEME,
   DEFAULT_TERMINAL_FONT,
+  DEFAULT_SCROLL_MODE,
+  SCROLL_MODE_OPTIONS,
   THEME_OPTIONS,
   TERMINAL_FONT_OPTIONS,
   type Theme,
   type TerminalFont,
+  type ScrollMode,
 } from './preferences-options';
 import { clientStrings } from '../i18n/client';
 
@@ -52,6 +55,9 @@ function save(key: string, value: string): void {
 const isTheme = (value: string | null): value is Theme =>
   THEME_OPTIONS.includes(value as Theme);
 
+const isScrollMode = (value: string | null): value is ScrollMode =>
+  SCROLL_MODE_OPTIONS.includes(value as ScrollMode);
+
 const isTerminalFont = (value: string | null): value is TerminalFont =>
   TERMINAL_FONT_OPTIONS.some((option) => option.value === value);
 
@@ -67,6 +73,12 @@ function applyTheme(theme: Theme): void {
 function applyTerminalFont(font: TerminalFont): void {
   if (font === DEFAULT_TERMINAL_FONT) delete root.dataset.termFont;
   else root.dataset.termFont = font;
+}
+
+/* desktops.ts watches this attribute and takes it from there. */
+function applyScrollMode(mode: ScrollMode): void {
+  if (mode === 'desktops') root.dataset.desktops = '';
+  else delete root.dataset.desktops;
 }
 
 /** The theme actually on screen, resolving "system" through the OS. */
@@ -118,6 +130,17 @@ function init(): void {
       if (!isTerminalFont(radio.value)) return;
       applyTerminalFont(radio.value);
       save(STORAGE_KEYS.terminalFont, radio.value);
+    });
+  });
+
+  const storedScroll = load(STORAGE_KEYS.scrollMode);
+  const scrollMode: ScrollMode = isScrollMode(storedScroll) ? storedScroll : DEFAULT_SCROLL_MODE;
+  document.querySelectorAll<HTMLInputElement>('[data-pref-scroll]').forEach((radio) => {
+    radio.checked = radio.value === scrollMode;
+    radio.addEventListener('change', () => {
+      if (!isScrollMode(radio.value)) return;
+      applyScrollMode(radio.value);
+      save(STORAGE_KEYS.scrollMode, radio.value);
     });
   });
 

@@ -2,16 +2,17 @@
 /*
  * Panel de control — a native <dialog> dressed as a Mac dialog box.
  *
- * Three settings, all applied instantly and remembered in localStorage:
+ * Four settings, all applied instantly and remembered in localStorage:
  *   • Language: Spanish or English (switches to that version of the page).
  *   • Appearance: follow the OS, or force light / dark.
  *   • Terminal font: VT323 (CRT), IBM Plex Mono or JetBrains Mono.
+ *   • Scrolling: virtual desktops (one section per screen) or one long page.
  *
  * Opened from the duck menu; behavior lives in src/scripts/preferences.ts.
  */
 
 import PixelIcon from './PixelIcon.astro';
-import { THEME_OPTIONS, TERMINAL_FONT_OPTIONS } from '../scripts/preferences-options';
+import { THEME_OPTIONS, TERMINAL_FONT_OPTIONS, SCROLL_MODE_OPTIONS } from '../scripts/preferences-options';
 import { getI18n, LOCALES, LANGUAGE_NAMES, localePath } from '../i18n';
 
 const { locale, t } = getI18n(Astro);
@@ -65,6 +66,17 @@ const { locale, t } = getI18n(Astro);
           </span>
         </label>
       ))}
+    </fieldset>
+
+    <fieldset class="prefs__group">
+      <legend class="prefs__legend">{t.preferences.scrolling}</legend>
+      {SCROLL_MODE_OPTIONS.map((option) => (
+        <label class="radio">
+          <input type="radio" name="scroll-mode" value={option} data-pref-scroll />
+          <span>{t.preferences.scrollModes[option]}</span>
+        </label>
+      ))}
+      <p class="prefs__hint">{t.preferences.scrollingHint}</p>
     </fieldset>
 
     <div class="prefs__actions">
@@ -141,6 +153,11 @@ const { locale, t } = getI18n(Astro);
     color: var(--term-fg);
     line-height: 1.6;
     white-space: nowrap;
+  }
+
+  .prefs__hint {
+    font-size: var(--text-sm);
+    color: var(--muted);
   }
 
   .prefs__actions {

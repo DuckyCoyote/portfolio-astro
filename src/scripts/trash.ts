@@ -150,9 +150,9 @@ function init(): void {
     if (motionAllowed()) {
       for (const file of files) {
         file.classList.add('is-trashed');
-        await wait(120);
+        await wait(80);
       }
-      await wait(200);
+      await wait(120);
     }
     quack();
     emptied = true;

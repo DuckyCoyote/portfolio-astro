@@ -14,8 +14,12 @@
  * which hides [data-zoom] windows until this module opens them; if the
  * module never boots, that script drops the attribute after a few seconds.
  *
- * zoomRects() is exported for other desktop toys (see trash.ts).
+ * zoomRects() is exported for other desktop toys (see trash.ts), and the
+ * window helpers (openWindows, closeWindow, revealWindow) for the virtual
+ * desktops (desktops.ts), which take over window opening in that mode.
  */
+
+import { desktopsActive } from './desktop-mode';
 
 const root = document.documentElement;
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -25,7 +29,7 @@ const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, 
 /* ------------------------------------------------------------------ */
 
 const ZOOM_STEPS = 7;
-const ZOOM_STEP_MS = 28;
+const ZOOM_STEP_MS = 18;
 
 export type Box = { left: number; top: number; width: number; height: number };
 
@@ -58,21 +62,46 @@ function seedOf(box: Box): Box {
   return { left: box.left + (box.width - width) / 2, top: box.top + (box.height - height) / 2, width, height };
 }
 
-/** Zoom a hidden window open, then type any terminal inside it. */
-async function openWindow(win: HTMLElement): Promise<void> {
-  if (win.classList.contains('is-open')) return;
-  const box = win.getBoundingClientRect();
-  await zoomRects(seedOf(box), box);
+/**
+ * Zoom hidden windows open one after another, then let any terminal inside
+ * them type. `stillWanted` is checked before each window so a desktop that
+ * was switched away from mid-way stops opening.
+ */
+export async function openWindows(
+  wins: HTMLElement[],
+  stillWanted: () => boolean = () => true,
+): Promise<void> {
+  const opened: HTMLElement[] = [];
+  for (const win of wins) {
+    if (win.classList.contains('is-open')) continue;
+    if (!stillWanted()) return;
+    const box = win.getBoundingClientRect();
+    await zoomRects(seedOf(box), box);
+    win.classList.add('is-open');
+    opened.push(win);
+  }
+  for (const win of opened) {
+    const session = win.querySelector<HTMLElement>('[data-typewriter]');
+    if (session) await typewriter(session);
+  }
+}
+
+/** Hide a window again so it can zoom open next time. */
+export function closeWindow(win: HTMLElement): void {
+  win.classList.remove('is-open');
+}
+
+/** Show a window at once, terminal fully typed — no animation. */
+export function revealWindow(win: HTMLElement): void {
   win.classList.add('is-open');
-  const session = win.querySelector<HTMLElement>('[data-typewriter]');
-  if (session) await typewriter(session);
+  win.querySelectorAll<HTMLElement>('[data-typewriter]').forEach(finishTypewriter);
 }
 
 /* ------------------------------------------------------------------ */
 /*  Typewriter                                                         */
 /* ------------------------------------------------------------------ */
 
-const TYPE_MS = 45;
+const TYPE_MS = 28;
 
 /*
  * Each direct child of a [data-typewriter] session is one step:
@@ -91,7 +120,10 @@ function prepareTypewriter(session: HTMLElement): void {
   }
 }
 
+/* A session types once; reopening its window later shows it already typed. */
 async function typewriter(session: HTMLElement): Promise<void> {
+  if ('typed' in session.dataset) return;
+  session.dataset.typed = '';
   for (const step of Array.from(session.children) as HTMLElement[]) {
     const text = step.querySelector<HTMLElement>('[data-text]');
 
@@ -103,18 +135,24 @@ async function typewriter(session: HTMLElement): Promise<void> {
         text.textContent += char;
         await wait(TYPE_MS);
       }
-      await wait(200);
+      await wait(120);
     } else if (step.hasAttribute('data-stagger')) {
       step.classList.remove('is-pending');
       for (const item of Array.from(step.children)) {
         item.classList.remove('is-pending');
-        await wait(70);
+        await wait(40);
       }
     } else {
       step.classList.remove('is-pending');
-      await wait(90);
+      await wait(50);
     }
   }
+}
+
+/** Skip the animation: show every step of a session now. */
+function finishTypewriter(session: HTMLElement): void {
+  session.dataset.typed = '';
+  session.querySelectorAll('.is-pending').forEach((step) => step.classList.remove('is-pending'));
 }
 
 /* ------------------------------------------------------------------ */
@@ -218,33 +256,29 @@ async function init(): Promise<void> {
   document.querySelectorAll<HTMLElement>('[data-typewriter]').forEach(prepareTypewriter);
   wireDesktopIcons();
 
-  // Hero windows open in order on load; the rest wait to be scrolled to.
+  // Continuous page: hero windows open in order on load; the rest wait to
+  // be scrolled to. In virtual desktops mode desktops.ts does all of this,
+  // once each desktop switch has settled.
   const hero = windows.filter((win) => win.closest('#hero'));
   const rest = windows.filter((win) => !hero.includes(win));
 
   const observer = new IntersectionObserver(
     (entries) => {
+      if (desktopsActive()) return;
       entries
         .filter((entry) => entry.isIntersecting)
         .forEach((entry, i) => {
           observer.unobserve(entry.target);
-          setTimeout(() => openWindow(entry.target as HTMLElement), i * 140);
+          setTimeout(() => openWindows([entry.target as HTMLElement]), i * 140);
         });
     },
     { rootMargin: '0px 0px -12% 0px', threshold: 0.1 },
   );
   rest.forEach((win) => observer.observe(win));
 
-  await wait(150);
-  for (const win of hero) {
-    const box = win.getBoundingClientRect();
-    await zoomRects(seedOf(box), box);
-    win.classList.add('is-open');
-  }
-  for (const win of hero) {
-    const session = win.querySelector<HTMLElement>('[data-typewriter]');
-    if (session) await typewriter(session);
-  }
+  if (desktopsActive()) return;
+  await wait(100);
+  await openWindows(hero);
 }
 
 init();

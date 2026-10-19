@@ -16,6 +16,7 @@ import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/components.css';
 import '../styles/utilities.css';
+import '../styles/desktops.css';
 
 import { siteMeta } from '../data/portfolio';
 import { STORAGE_KEYS, TERMINAL_FONT_OPTIONS, DEFAULT_TERMINAL_FONT } from '../scripts/preferences-options';
@@ -76,6 +77,13 @@ const { title = l(siteMeta.title), description = l(siteMeta.description) } = Ast
         if (localStorage.getItem(keys.trash) === '1') document.documentElement.dataset.trash = 'empty';
       } catch {}
 
+      // Virtual desktops are on unless the visitor turned them off.
+      try {
+        if (localStorage.getItem(keys.scrollMode) !== 'continuous') document.documentElement.dataset.desktops = '';
+      } catch {
+        document.documentElement.dataset.desktops = '';
+      }
+
       // Animations (src/scripts/motion.ts) hide windows until they zoom open.
       // If that module hasn't booted within 3s, show everything as-is.
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -122,7 +130,7 @@ const { title = l(siteMeta.title), description = l(siteMeta.description) } = Ast
                 document.querySelector(href)?.scrollIntoView();
                 history.pushState(null, '', href);
               }
-            }, 240);
+            }, 180);
           });
         });
         document.addEventListener('click', (event) => {
@@ -151,6 +159,7 @@ const { title = l(siteMeta.title), description = l(siteMeta.description) } = Ast
 
     <script>
       import '../scripts/motion';
+      import '../scripts/desktops';
     </script>
   </body>
 </html>

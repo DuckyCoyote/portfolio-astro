@@ -14,7 +14,8 @@ Construido con **Astro** y **CSS escrito a mano**, sin frameworks de UI ni de ut
 - **Terminales TUI**: `neofetch`, paneles con borde doble y una sesión que escribe sus comandos al aparecer.
 - **Español e inglés**: `/` y `/en/`, con selector en la barra de menús y en el Panel de control. Se recuerda el idioma elegido.
 - **Tema claro y oscuro**: sigue al sistema operativo o se fija desde la barra de menús. La elección se guarda en el navegador.
-- **Panel de control**: idioma, tema y fuente de las terminales (VT323, IBM Plex Mono o JetBrains Mono).
+- **Escritorios virtuales** (experimento, pantallas grandes): cada sección ocupa la pantalla y cada gesto de scroll cambia de escritorio. Las ventanas se abren cuando el cambio termina, hay un selector de escritorios en la barra de menús y se puede volver a la página continua desde el Panel de control.
+- **Panel de control**: idioma, tema, desplazamiento y fuente de las terminales (VT323, IBM Plex Mono o JetBrains Mono).
 - **Animaciones del Finder**: las ventanas se abren con el zoom de rectángulos, los menús parpadean al elegir una opción y las ventanas del inicio se pueden arrastrar. Todo se desactiva con `prefers-reduced-motion`.
 - **Formulario de contacto con EmailJS**: validación, espera de 1 minuto entre envíos y límite de 5 mensajes al día.
 - **Accesible y responsive**: navegación por teclado, foco visible y diseño adaptado a móvil.
@@ -71,6 +72,8 @@ src/
 ├── scripts/
 │   ├── contact-form.ts     # Validación, límites y envío con EmailJS
 │   ├── motion.ts           # Zoom de ventanas, escritura de terminales, arrastre
+│   ├── desktops.ts         # Escritorios virtuales: gestos, selector, aviso en pantalla
+│   ├── desktop-mode.ts     # ¿Está activo el modo escritorios?
 │   ├── preferences.ts      # Idioma, tema y fuente de terminal
 │   ├── preferences-options.ts
 │   └── trash.ts
@@ -78,6 +81,7 @@ src/
     ├── tokens.css          # Colores (claro/oscuro), espaciado, tipografía
     ├── base.css            # Reset, fuentes y fondo del escritorio
     ├── components.css      # Ventana, terminal, botones, campos, diálogos…
+    ├── desktops.css        # Modo escritorios virtuales
     └── utilities.css
 ```
 

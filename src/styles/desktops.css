@@ -1,0 +1,167 @@
+/*
+ * Virtual desktops (experiment) — <html data-desktops>, large screens only.
+ *
+ * Every section becomes one full-screen desktop under the menu bar.
+ * Scrolling snaps exactly one desktop per gesture; windows too tall for
+ * their desktop scroll inside, with Mac-style scroll bars. Leaving and
+ * arriving desktops step through a few frames, like an old OS redrawing.
+ * Behaviour (pager, on-screen display, windows opening once a switch has
+ * settled) lives in src/scripts/desktops.ts.
+ *
+ * The media query must match desktopQuery in src/scripts/desktop-mode.ts.
+ */
+
+@media (min-width: 64rem) and (min-height: 40rem) {
+  :root[data-desktops] {
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: var(--menubar-height);
+  }
+
+  /* ---------- One desktop per section ---------- */
+
+  :root[data-desktops] main > section {
+    box-sizing: border-box;
+    height: calc(100dvh - var(--menubar-height));
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    padding-block: var(--space-8);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  :root[data-desktops] .site-footer {
+    scroll-snap-align: end;
+  }
+
+  /* Windows shrink to fit their desktop; the body scrolls instead.
+     (Contact keeps its own two-column grid, styled below.) */
+  :root[data-desktops] .section > .container:not(.contact__grid) {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+  }
+
+  :root[data-desktops] .section > .container > .window {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  :root[data-desktops] .section > .container > .window > .window__body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  /* Contact: dialog + terminal side by side, each scrolling if needed. */
+  :root[data-desktops] .section > .contact__grid {
+    max-height: 100%;
+  }
+
+  :root[data-desktops] .contact__grid > .dialog,
+  :root[data-desktops] .contact__grid > .window {
+    max-height: 100%;
+    overflow: auto;
+  }
+
+  /* ---------- Mac scroll bars inside windows ---------- */
+
+  :root[data-desktops] .window__body,
+  :root[data-desktops] .contact__grid > .dialog {
+    scrollbar-color: var(--ink) var(--paper);
+  }
+
+  :root[data-desktops] .window--terminal .window__body {
+    scrollbar-color: var(--term-fg) var(--term-bg);
+  }
+
+  :root[data-desktops] .window__body::-webkit-scrollbar {
+    width: 18px;
+  }
+
+  :root[data-desktops] .window__body::-webkit-scrollbar-track {
+    border-left: var(--line);
+    background: var(--checker-pattern) 0 0 / 4px 4px, var(--paper);
+  }
+
+  :root[data-desktops] .window__body::-webkit-scrollbar-thumb {
+    border: var(--line);
+    background-color: var(--paper);
+  }
+
+  /* ---------- Switching frames ---------- */
+
+  /* The desktop being left sinks back and fades; the arriving one rises
+     into place. steps() keeps it chunky, like a 1-bit screen redraw. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      :root[data-desktops] main > section > .container {
+        animation:
+          desktop-arrive steps(5, end) both,
+          desktop-leave steps(5, end) both;
+        animation-timeline: view(), view();
+        animation-range: entry 15% entry 100%, exit 0% exit 85%;
+      }
+    }
+  }
+}
+
+@keyframes desktop-arrive {
+  from { opacity: 0; transform: translateY(10%) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes desktop-leave {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(-6%) scale(0.94); }
+}
+
+/* ---------- On-screen display (created by desktops.ts) ---------- */
+
+.desktop-osd {
+  position: fixed;
+  top: calc(var(--menubar-height) + var(--space-4));
+  left: 50%;
+  z-index: 90;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-5);
+  background-color: var(--paper);
+  border: var(--line);
+  box-shadow: var(--shadow-menu);
+  font-family: var(--font-system);
+  pointer-events: none;
+  transform: translateX(-50%);
+  visibility: hidden;
+}
+
+.desktop-osd.is-visible {
+  visibility: visible;
+}
+
+.desktop-osd__pager {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-1);
+}
+
+.desktop-osd__pager span {
+  width: 1.5rem;
+  height: 1rem;
+  border: var(--line);
+}
+
+.desktop-osd__pager span.is-current {
+  background-color: var(--ink);
+}
+
+.desktop-osd__number {
+  font-size: var(--text-sm);
+}
+
+.desktop-osd__name {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
