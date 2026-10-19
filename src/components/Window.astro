@@ -1,0 +1,66 @@
+---
+/*
+ * Window — the Mac System 1 window frame used by every section.
+ *
+ *   ┌[□]≡≡≡≡≡≡ Title ≡≡≡≡≡≡[▣]┐
+ *   │ 3 items      …     info │   ← optional Finder info strip
+ *   ├══════════════════════════┤
+ *   │ <slot />                 │
+ *   └──────────────────────────┘
+ *
+ * `variant="terminal"` turns the body into a phosphor-green TUI.
+ * `titleAs` lets the title double as the section heading (h2) or stay a
+ * plain label when the section already has one.
+ *
+ * Extra attributes are forwarded to the root so the parent's scoped
+ * styles (Astro's data-astro-cid-*) reach it through `class`.
+ *
+ * `data-zoom` lets src/scripts/motion.ts open the window with the Finder's
+ * zoom animation when it first scrolls into view; pass `zoom={false}` for
+ * windows that live inside a <dialog> and animate on their own.
+ * `closable` turns the close box into a real button ([data-window-close])
+ * for the owner's script to handle.
+ */
+
+interface Props {
+  title: string;
+  titleAs?: 'h1' | 'h2' | 'h3' | 'span';
+  info?: string[];
+  variant?: 'document' | 'terminal';
+  class?: string;
+  zoom?: boolean;
+  closable?: boolean;
+  [attr: string]: unknown;
+}
+
+const {
+  title,
+  titleAs: TitleTag = 'h2',
+  info = [],
+  variant = 'document',
+  class: className = '',
+  zoom = true,
+  closable = false,
+  ...attrs
+} = Astro.props;
+---
+
+<div class:list={['window', variant === 'terminal' && 'window--terminal', className]} data-zoom={zoom ? '' : undefined} {...attrs}>
+  <div class="window__titlebar">
+    {closable
+      ? <button type="button" class="window__box window__box--close" aria-label="Cerrar ventana" data-window-close></button>
+      : <span class="window__box window__box--close" aria-hidden="true"></span>}
+    <TitleTag class="window__title">{title}</TitleTag>
+    <span class="window__box window__box--zoom" aria-hidden="true"></span>
+  </div>
+
+  {info.length > 0 && (
+    <div class="window__info">
+      {info.map((item) => <span>{item}</span>)}
+    </div>
+  )}
+
+  <div class="window__body">
+    <slot />
+  </div>
+</div>

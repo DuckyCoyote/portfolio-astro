@@ -1,91 +1,112 @@
 /*
- * Design tokens for the retro portfolio.
+ * Design tokens for the portfolio.
  *
- * Every visual value in the site is defined here as a CSS custom property so
- * the rest of the stylesheet can read like prose. The theme is intentionally
- * a maximalist 80s/90s palette: hard borders, flat colors, no gradients,
- * no rounded corners. When in doubt, look here first.
+ * The look borrows from the 1-bit Macintosh desktop (System 1–3): black ink
+ * on white paper, a dithered grey desktop and windows with striped title
+ * bars. Everything is drawn on a 2px "pixel" grid so borders, shadows and
+ * icons line up. The only colour lives inside the terminals: phosphor green.
+ *
+ * Theming: every colour is a light-dark() pair. The dark theme is the Mac's
+ * "inverted screen" — light ink on dark paper. `color-scheme` picks the
+ * side: the OS preference by default, or an explicit choice stored in
+ * <html data-theme="light|dark"> (see src/scripts/preferences.ts).
  */
 
 :root {
-  /* ------------------------------------------------------------- */
-  /* Palette — flat neon colors used everywhere in the design.      */
-  /* ------------------------------------------------------------- */
-
-  --color-black: #000000;
-  --color-white: #ffffff;
-  --color-cream: #f5e6d3;            /* warm beige page background */
-  --color-green: #00ff00;            /* terminal / matrix green */
-  --color-magenta: #ff00ff;
-  --color-cyan: #00ffff;
-  --color-yellow: #ffff00;
-  --color-red: #ff0000;
-  --color-coral: #ff6b6b;
-  --color-teal: #4ecdc4;
+  color-scheme: light dark;
 
   /* ------------------------------------------------------------- */
-  /* Spacing scale — matches the original 4px grid (Tailwind).      */
+  /* Palette                                                         */
+  /* ------------------------------------------------------------- */
+
+  --ink: light-dark(#000000, #f2f2f2);
+  --paper: light-dark(#ffffff, #161616);
+  --desktop: light-dark(#ffffff, #000000);         /* desktop base colour */
+  --desktop-dot: light-dark(#000000, #2e2e2e);     /* desktop dither dot */
+  --muted: light-dark(#5a5a5a, #a8a8a8);           /* hints, placeholders */
+  --disabled: light-dark(#8a8a8a, #6a6a6a);        /* dimmed menu items / buttons */
+
+  /* Terminals stay a black CRT in both themes. */
+  --term-bg: #000000;
+  --term-fg: #00ff00;                              /* phosphor */
+  --term-dim: #00a800;
+  --term-bright: #ffffff;
+
+  /* Neofetch colour blocks are the only place the old neon palette shows. */
+  --neon-magenta: #ff00ff;
+  --neon-cyan: #00ffff;
+  --neon-yellow: #ffff00;
+  --neon-coral: #ff6b6b;
+
+  /* Dither patterns, drawn with gradients so they follow the theme.
+     Desktop: one 2px dot per 4px cell (25% grey). Checker: 50% grey. */
+  --desktop-pattern: conic-gradient(var(--desktop-dot) 25%, transparent 0);
+  --checker-pattern: conic-gradient(var(--ink) 25%, transparent 0 50%, var(--ink) 0 75%, transparent 0);
+
+  /* ------------------------------------------------------------- */
+  /* Pixel grid                                                      */
+  /* ------------------------------------------------------------- */
+
+  --px: 2px;                          /* one "Mac pixel" */
+  --line: var(--px) solid var(--ink);
+  --shadow-window: var(--px) var(--px) 0 0 var(--ink);
+  --shadow-menu: var(--px) var(--px) 0 0 var(--ink);
+
+  /* ------------------------------------------------------------- */
+  /* Spacing (4px base)                                              */
   /* ------------------------------------------------------------- */
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
+  --space-5: 1.25rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
+  --space-10: 2.5rem;
   --space-12: 3rem;
-  --space-20: 5rem;
+  --space-16: 4rem;
 
   /* ------------------------------------------------------------- */
-  /* Borders — the whole design is held together by thick black     */
-  /* borders. These tokens are used for every box in the site.      */
+  /* Type                                                            */
   /* ------------------------------------------------------------- */
 
-  --border-thin: 2px solid var(--color-black);
-  --border-medium: 4px solid var(--color-black);
-  --border-thick: 8px solid var(--color-black);
-  --border-bottom-thick: 4px solid var(--color-black);
+  --font-system: "Pixelify Sans", "Chicago", ui-monospace, monospace;   /* menus, titles, buttons */
+  --font-body: "Atkinson Hyperlegible", "Geneva", system-ui, sans-serif; /* reading text */
+  --font-terminal: "VT323", ui-monospace, "Courier New", monospace;     /* TUI, overridable */
+
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 2.75rem;
+  --text-hero: clamp(3rem, 8vw, 5.25rem);
+  --text-terminal: 1.375rem;          /* VT323 runs small */
+  --leading-terminal: 1.25;
 
   /* ------------------------------------------------------------- */
-  /* Hard shadows — the offset "neobrutalist" drop.                  */
-  /* No blur, no opacity, just pure black offset.                   */
+  /* Layout                                                          */
   /* ------------------------------------------------------------- */
 
-  --shadow-medium: 8px 8px 0 0 var(--color-black);
-  --shadow-large: 12px 12px 0 0 var(--color-black);
+  --container: 72rem;
+  --menubar-height: 2.75rem;
+}
 
-  /* ------------------------------------------------------------- */
-  /* Type scale — matches the original Tailwind sizes.              */
-  /* ------------------------------------------------------------- */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; }
 
-  --font-family-base:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+/* Terminal font preference (<html data-term-font>). Each face gets its own
+   size because VT323 is drawn much smaller than regular monospace fonts. */
+:root[data-term-font="plex"] {
+  --font-terminal: "IBM Plex Mono", ui-monospace, monospace;
+  --text-terminal: 1rem;
+  --leading-terminal: 1.55;
+}
 
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 1.875rem;
-  --text-4xl: 2.25rem;
-  --text-5xl: 3rem;
-  --text-6xl: 3.75rem;
-  --text-7xl: 4.5rem;
-
-  /* ------------------------------------------------------------- */
-  /* Layout                                                           */
-  /* ------------------------------------------------------------- */
-
-  --container-narrow: 72rem;          /* 6xl — most sections */
-  --container-wide: 80rem;            /* 7xl — top nav */
-
-  /* ------------------------------------------------------------- */
-  /* Motion                                                           */
-  /* ------------------------------------------------------------- */
-
-  --transition-colors: color 150ms ease, background-color 150ms ease,
-    border-color 150ms ease;
-  --transition-transform: transform 150ms ease;
+:root[data-term-font="jetbrains"] {
+  --font-terminal: "JetBrains Mono", ui-monospace, monospace;
+  --text-terminal: 0.975rem;
+  --leading-terminal: 1.55;
 }

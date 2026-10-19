@@ -8,14 +8,17 @@
  *      button until it expires.
  *   2. Cap the number of submissions per day (default: 5).
  *   3. Validate the message content (length and obvious spam patterns).
- *   4. Call EmailJS to deliver the message.
+ *   4. Call EmailJS to deliver the message. The library is imported only at
+ *      submit time, so the submit handler is attached even if the import is
+ *      blocked (ad blockers often block anything named "emailjs") — in that
+ *      case the visitor gets an error pointing to the email address instead
+ *      of a native form submission.
  *   5. Show one of four banners — success, error, cooldown, limit.
  *
  * Readability over cleverness: each step is its own short function so the
  * flow of `init()` reads like an English description of the workflow.
  */
 
-import emailjs from '@emailjs/browser';
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -176,6 +179,11 @@ function init(): void {
     counter.textContent = String(message.value.length);
   };
   message.addEventListener('input', updateCounter);
+  // "Borrar" resets the fields after the event fires, so read on the next tick.
+  form.addEventListener('reset', () => {
+    window.setTimeout(updateCounter);
+    hideBanner(banner);
+  });
   updateCounter();
 
   /* Tick down the cooldown every second. */
@@ -183,9 +191,9 @@ function init(): void {
     const { remaining } = readCooldown();
     if (remaining > 0) {
       const seconds = Math.ceil(remaining / 1000);
-      setSubmitLabel(submit, submitLabel, `ESPERA ${seconds}s`, true);
+      setSubmitLabel(submit, submitLabel, `Espera ${seconds}s`, true);
     } else {
-      setSubmitLabel(submit, submitLabel, 'ENVIAR MENSAJE', false);
+      setSubmitLabel(submit, submitLabel, 'Enviar mensaje', false);
     }
   };
   tickCooldown();
@@ -231,9 +239,10 @@ function init(): void {
     }
 
     // 4) Send via EmailJS
-    setSubmitLabel(submit, submitLabel, 'ENVIANDO...', true);
+    setSubmitLabel(submit, submitLabel, 'Enviando…', true);
 
     try {
+      const { default: emailjs } = await import('@emailjs/browser');
       await emailjs.send(
         SERVICE_ID,
         TEMPLATE_ID,
@@ -250,15 +259,16 @@ function init(): void {
       markSubmittedNow();
       incrementAttemptCount();
 
-      showBanner(banner, 'success', '¡Mensaje enviado exitosamente!');
+      // Reset first: the reset handler hides the banner, so show it after.
       form.reset();
       updateCounter();
+      showBanner(banner, 'success', '¡Mensaje enviado exitosamente!');
       tickCooldown();
       window.setTimeout(() => hideBanner(banner), 5000);
     } catch (err) {
       console.error('Error al enviar el mensaje:', err);
-      showBanner(banner, 'error', 'Error al enviar. Verifica que el mensaje sea válido.');
-      setSubmitLabel(submit, submitLabel, 'ENVIAR MENSAJE', false);
+      showBanner(banner, 'error', `No se pudo enviar. Inténtalo de nuevo o escríbeme a ${TO_EMAIL}.`);
+      setSubmitLabel(submit, submitLabel, 'Enviar mensaje', false);
       window.setTimeout(() => hideBanner(banner), 5000);
     }
   });

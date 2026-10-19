@@ -1,0 +1,217 @@
+---
+/*
+ * Papelera — the easter egg on the hero desktop.
+ *
+ * Behaves like the Finder's trash: one click selects the icon, a double
+ * click (or Enter) opens it. Inside is a window of "deleted" files; picking
+ * one shows its story in the status strip. "Vaciar papelera" asks for
+ * confirmation with a classic alert, then empties it with a quack.
+ * The emptied state is remembered; a later visit can restore the files.
+ *
+ * Behavior lives in src/scripts/trash.ts.
+ */
+
+import { trashItems } from '../data/portfolio';
+import Window from './Window.astro';
+import PixelIcon from './PixelIcon.astro';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<button
+  type="button"
+  class:list={['desk-icon', 'trash__icon', className]}
+  aria-label="Papelera (doble clic para abrir)"
+  aria-haspopup="dialog"
+  data-trash-icon
+>
+  <PixelIcon name="trash-full" scale={3} class="trash__glyph trash__glyph--full" />
+  <PixelIcon name="trash" scale={3} class="trash__glyph trash__glyph--empty" />
+  <span class="desk-icon__label">Papelera</span>
+</button>
+
+<dialog class="trash" aria-labelledby="trash-title" data-trash-dialog>
+  <Window
+    title="Papelera"
+    titleAs="span"
+    zoom={false}
+    closable
+    info={[`${trashItems.length} elementos`, '12K en disco', '∞ lecciones aprendidas']}
+    class="trash__window"
+  >
+    <h2 class="visually-hidden" id="trash-title">Papelera</h2>
+
+    <ul class="trash__files" data-trash-files>
+      {trashItems.map((item) => (
+        <li>
+          <button type="button" class="desk-icon trash__file" data-note={item.note}>
+            <PixelIcon name={item.icon} scale={3} />
+            <span class="desk-icon__label">{item.name}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+
+    <p class="trash__empty" data-trash-empty-message hidden>
+      La papelera está vacía. Como mi lista de bugs… casi.
+    </p>
+
+    <div class="trash__footer">
+      <p class="trash__status" role="status" aria-live="polite" data-trash-status>
+        Haz clic en un archivo para ver qué es.
+      </p>
+      <button type="button" class="btn btn--default" data-trash-empty>Vaciar papelera</button>
+      <button type="button" class="btn" data-trash-restore hidden>Restaurar archivos</button>
+    </div>
+  </Window>
+</dialog>
+
+<dialog class="dialog trash-alert" aria-labelledby="trash-alert-title" aria-describedby="trash-alert-text" data-trash-alert>
+  <form method="dialog" class="trash-alert__body">
+    <span class="trash-alert__mark" aria-hidden="true">!</span>
+    <div>
+      <h2 class="trash-alert__title" id="trash-alert-title">¿Vaciar la Papelera?</h2>
+      <p id="trash-alert-text">
+        Se eliminarán {trashItems.length} elementos para siempre. Bueno… siguen en el historial de git.
+      </p>
+    </div>
+    <div class="trash-alert__actions">
+      <button class="btn" value="cancel">Cancelar</button>
+      <button class="btn btn--default" value="confirm">Vaciar</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  import '../scripts/trash';
+</script>
+
+<style>
+  /* ---------- Desktop icon ---------- */
+
+  .trash__icon {
+    cursor: default;
+  }
+
+  /* Full until emptied (state set by trash.ts on <html data-trash>). */
+  .trash__icon :global(.trash__glyph--empty) { display: none; }
+  :global(:root[data-trash="empty"]) .trash__icon :global(.trash__glyph--empty) { display: block; }
+  :global(:root[data-trash="empty"]) .trash__icon :global(.trash__glyph--full) { display: none; }
+
+  /* ---------- Trash window ---------- */
+
+  .trash {
+    width: min(40rem, calc(100% - 2rem));
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+    color: var(--ink);
+  }
+
+  .trash::backdrop,
+  .trash-alert::backdrop {
+    background: transparent;
+  }
+
+  .trash.is-zooming {
+    visibility: hidden;
+  }
+
+  .trash__files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4) var(--space-2);
+    min-height: 7.5rem;
+  }
+
+  .trash__file {
+    width: 7rem;
+  }
+
+  .trash__file :global(.desk-icon__label) {
+    overflow-wrap: anywhere;
+  }
+
+  .trash__file[aria-pressed="true"] :global(.desk-icon__label) {
+    background-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .trash__file[aria-pressed="true"] :global(svg) {
+    filter: invert(1);
+  }
+
+  /* Emptying: each file blinks out in a couple of steps. */
+  .trash__file.is-trashed {
+    animation: trash-out 240ms steps(3, end) forwards;
+  }
+
+  @keyframes trash-out {
+    to { opacity: 0; transform: scale(0.3) translateY(1rem); }
+  }
+
+  .trash__empty {
+    min-height: 7.5rem;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-system);
+    text-align: center;
+  }
+
+  .trash__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: var(--px) dotted var(--ink);
+  }
+
+  .trash__status {
+    flex: 1;
+    min-width: 14rem;
+    font-size: var(--text-sm);
+  }
+
+  /* ---------- Alert ---------- */
+
+  .trash-alert {
+    width: min(28rem, calc(100% - 2rem));
+  }
+
+  .trash-alert__body {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4) var(--space-5);
+  }
+
+  .trash-alert__mark {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: var(--line);
+    font-family: var(--font-system);
+    font-size: var(--text-xl);
+    font-weight: 700;
+  }
+
+  .trash-alert__title {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-2);
+  }
+
+  .trash-alert__actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--space-4);
+  }
+</style>

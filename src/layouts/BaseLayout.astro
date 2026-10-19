@@ -6,8 +6,9 @@
  *   • Provide the <head> with metadata.
  *   • Load the design tokens + base + components + utilities CSS, in that
  *     order so components can depend on tokens.
- *   • Load the small client-side scripts that power the contact form and
- *     the mobile menu.
+ *   • Apply saved preferences and the motion flag before first paint.
+ *   • Load the small client-side scripts: duck menu, menu bar clock and
+ *     the desktop animations (src/scripts/motion.ts).
  *   • Slot the page content.
  */
 
@@ -17,6 +18,11 @@ import '../styles/components.css';
 import '../styles/utilities.css';
 
 import { siteMeta } from '../data/portfolio';
+import { STORAGE_KEYS, TERMINAL_FONT_OPTIONS, DEFAULT_TERMINAL_FONT } from '../scripts/preferences-options';
+
+const altTerminalFonts = TERMINAL_FONT_OPTIONS
+  .map((option) => option.value)
+  .filter((value) => value !== DEFAULT_TERMINAL_FONT);
 
 interface Props {
   title?: string;
@@ -39,31 +45,91 @@ const { title = siteMeta.title, description = siteMeta.description } = Astro.pro
     <meta property="og:title"       content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type"        content="website" />
+
+    {/* Apply saved preferences before first paint so the page never flashes
+        the wrong theme. The controls live in src/scripts/preferences.ts. */}
+    <script is:inline define:vars={{ keys: STORAGE_KEYS, altTerminalFonts }}>
+      try {
+        const theme = localStorage.getItem(keys.theme);
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+        const font = localStorage.getItem(keys.terminalFont);
+        if (altTerminalFonts.includes(font)) document.documentElement.dataset.termFont = font;
+        if (localStorage.getItem(keys.trash) === '1') document.documentElement.dataset.trash = 'empty';
+      } catch {}
+
+      // Animations (src/scripts/motion.ts) hide windows until they zoom open.
+      // If that module hasn't booted within 3s, show everything as-is.
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const root = document.documentElement;
+        root.dataset.motion = '';
+        setTimeout(() => { if (!('motionReady' in root.dataset)) delete root.dataset.motion; }, 3000);
+      }
+    </script>
   </head>
 
   <body>
     <slot />
 
-    {/* Mobile menu toggling — tiny inline script, no framework needed. */}
+    {/* Duck menu + menu bar clock — tiny inline script, no framework needed. */}
     <script>
       const menuButton = document.querySelector<HTMLButtonElement>('[data-menu-button]');
-      const mobileMenu = document.querySelector<HTMLElement>('[data-mobile-menu]');
+      const menu = document.querySelector<HTMLElement>('[data-menu]');
 
-      if (menuButton && mobileMenu) {
-        menuButton.addEventListener('click', () => {
-          const isOpen = mobileMenu.dataset.open === 'true';
-          mobileMenu.dataset.open = String(!isOpen);
-          menuButton.setAttribute('aria-expanded', String(!isOpen));
-        });
+      if (menuButton && menu) {
+        const setOpen = (open: boolean) => {
+          menu.hidden = !open;
+          menuButton.setAttribute('aria-expanded', String(open));
+        };
 
-        // Close the menu whenever a link inside it is clicked.
-        mobileMenu.querySelectorAll('a').forEach((link) => {
-          link.addEventListener('click', () => {
-            mobileMenu.dataset.open = 'false';
-            menuButton.setAttribute('aria-expanded', 'false');
+        menuButton.addEventListener('click', () => setOpen(menu.hidden));
+
+        // Close on picking an entry, clicking elsewhere, or pressing Escape.
+        // Picking an entry blinks it before the menu closes, like the
+        // original Finder. In-page links wait for the blink to finish.
+        const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        menu.querySelectorAll<HTMLElement>('a, button').forEach((entry) => {
+          entry.addEventListener('click', (event) => {
+            if (reduceMotion) return setOpen(false);
+            const href = entry.getAttribute('href');
+            const inPage = href?.startsWith('#');
+            if (inPage) event.preventDefault();
+            entry.classList.add('is-blinking');
+            setTimeout(() => {
+              entry.classList.remove('is-blinking');
+              setOpen(false);
+              if (inPage && href) {
+                document.querySelector(href)?.scrollIntoView();
+                history.pushState(null, '', href);
+              }
+            }, 240);
           });
         });
+        document.addEventListener('click', (event) => {
+          if (!menu.hidden && !menu.parentElement?.contains(event.target as Node)) setOpen(false);
+        });
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && !menu.hidden) {
+            setOpen(false);
+            menuButton.focus();
+          }
+        });
       }
+
+      const clock = document.querySelector<HTMLTimeElement>('[data-clock]');
+      if (clock) {
+        const format = new Intl.DateTimeFormat('es-ES', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+        const tick = () => {
+          const now = new Date();
+          clock.textContent = format.format(now);
+          clock.dateTime = now.toISOString();
+        };
+        tick();
+        setInterval(tick, 15_000);
+      }
+    </script>
+
+    <script>
+      import '../scripts/motion';
     </script>
   </body>
 </html>

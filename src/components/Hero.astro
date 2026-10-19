@@ -1,129 +1,159 @@
 ---
 /*
- * Hero — the first screen a visitor sees.
+ * Hero — the desktop as it looks right after boot.
  *
- * Layout: a single thick-bordered card with a 2-column grid inside.
- * Left column: badge, headline, two CTAs. Right column: a "retro computer
- * screen" decoration with animated dots. The right column hides on mobile.
+ *   ┌ Léeme ───────────────┐          [folder] Proyectos
+ *   │ Hola.                 │          [doc]    Experiencia
+ *   │ Soy Alejo.            │          [mail]   Contacto
+ *   │ tagline  [Ver] [Cont] │          [disk]   GitHub
+ *   └──────────┌ Terminal ──────────┐
+ *              │ $ whoami            │
+ *              └─────────────────────┘          [trash]
+ *
+ * On load both windows zoom open and the terminal types its lines; on wide
+ * screens the windows can be dragged around by their title bars. All of it
+ * lives in src/scripts/motion.ts — without JS, or with reduced motion, the
+ * desktop renders complete and still.
  */
 
-import { heroContent } from '../data/portfolio';
-import Icon from './Icon.astro';
+import { heroContent, siteMeta } from '../data/portfolio';
+import Window from './Window.astro';
+import PixelIcon from './PixelIcon.astro';
+import Trash from './Trash.astro';
+import type { PixelIconName } from './PixelIcon.astro';
+
+const deskIcons: { label: string; href: string; icon: PixelIconName; external?: boolean }[] = [
+  { label: 'Proyectos',   href: '#projects',   icon: 'folder' },
+  { label: 'Experiencia', href: '#experience', icon: 'document' },
+  { label: 'Contacto',    href: '#contact',    icon: 'mail' },
+  { label: 'GitHub',      href: 'https://github.com/DuckyCoyote', icon: 'disk', external: true },
+];
+
+const PROMPT = 'alejo@portfolio:~$';
+const terminalLines = [
+  { kind: 'cmd', text: 'whoami' },
+  { kind: 'out', text: `${siteMeta.author}, ${heroContent.role}` },
+  { kind: 'cmd', text: 'cat estado.txt' },
+  { kind: 'out', text: heroContent.status },
+] as const;
 ---
 
 <section id="hero" class="hero">
-  <div class="container">
-    <div class="hero__card">
-      <div class="hero__grid">
+  <div class="container hero__desktop">
 
-        {/* ---------------- Left column ---------------- */}
-        <div class="hero__intro">
-          <span class="hero__badge">{heroContent.badge}</span>
+    <div class="hero__windows">
+      <Window
+        title="Léeme"
+        titleAs="span"
+        info={[heroContent.role, 'Disponible']}
+        class="hero__readme"
+      >
+        <h1 class="hero__heading">
+          <span class="hero__line">{heroContent.greeting}</span>
+          <span class="hero__line">{heroContent.name}</span>
+        </h1>
 
-          <h1 class="hero__heading">
-            <span class="hero__line">{heroContent.greeting}</span>
-            <span class="hero__line">{heroContent.name}</span>
-          </h1>
+        <p class="hero__tagline">{heroContent.tagline}</p>
 
-          <p class="hero__tagline">{heroContent.tagline}</p>
-
-          <div class="hero__actions">
-            <a class="btn btn--primary" href={heroContent.primaryCta.href}>
-              {heroContent.primaryCta.label}
-              <Icon name="arrow-right" size={20} />
-            </a>
-            <a class="btn btn--secondary" href={heroContent.secondaryCta.href}>
-              {heroContent.secondaryCta.label}
-              <Icon name="terminal" size={20} />
-            </a>
-          </div>
+        <div class="hero__actions">
+          <a class="btn btn--default" href={heroContent.primaryCta.href}>
+            {heroContent.primaryCta.label}
+          </a>
+          <a class="btn" href={heroContent.secondaryCta.href}>
+            {heroContent.secondaryCta.label}
+          </a>
         </div>
+      </Window>
 
-        {/* ---------------- Right column ---------------- */}
-        <div class="hero__illustration md-show">
-          <div class="hero__illustration-frame">
-            <div class="hero__screen" aria-hidden="true">
-              <div class="hero__screen-tint"></div>
-              <div class="hero__screen-content">
-                <div class="hero__code">&lt;/&gt;</div>
-                <div class="hero__dots">
-                  <span class="hero__dot anim-pulse"></span>
-                  <span class="hero__dot anim-pulse anim-delay-1"></span>
-                  <span class="hero__dot anim-pulse anim-delay-2"></span>
-                </div>
-              </div>
-            </div>
-            {/* Decorative corner squares — magenta + cyan, anchored to opposite corners. */}
-            <span class="hero__corner hero__corner--magenta" aria-hidden="true"></span>
-            <span class="hero__corner hero__corner--cyan"    aria-hidden="true"></span>
-          </div>
+      <Window title="Terminal" titleAs="span" variant="terminal" class="hero__terminal">
+        <div data-typewriter>
+          {terminalLines.map((line) => (
+            /* One line on purpose: .term-line preserves whitespace. */
+            <p class="term-line" data-kind={line.kind}>{line.kind === 'cmd' && <span class="term-prompt">{PROMPT} </span>}<span data-text>{line.text}</span></p>
+          ))}
+          <p class="term-line"><span class="term-prompt">{PROMPT} </span><span class="term-cursor" aria-hidden="true"></span></p>
         </div>
-
-      </div>
+      </Window>
     </div>
+
+    <nav class="hero__icons" aria-label="Accesos directos">
+      {deskIcons.map((item) => (
+        <a
+          class="desk-icon"
+          href={item.href}
+          target={item.external ? '_blank' : undefined}
+          rel={item.external ? 'noopener noreferrer' : undefined}
+        >
+          <PixelIcon name={item.icon} scale={3} />
+          <span class="desk-icon__label">{item.label}</span>
+        </a>
+      ))}
+      <Trash class="hero__trash" />
+    </nav>
+
   </div>
 </section>
 
 <style>
-  /* The hero fills the viewport vertically and centers its content. */
   .hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding-block: var(--space-8) var(--space-10);
   }
 
-  @media (min-width: 48rem) {
-    .hero { padding-block: var(--space-4); }
+  .hero__desktop {
+    display: grid;
+    gap: var(--space-8);
   }
 
   @media (min-width: 64rem) {
-    .hero { padding-block: var(--space-20); }
+    .hero {
+      min-height: calc(100vh - var(--menubar-height));
+      display: flex;
+      align-items: center;
+    }
+
+    .hero__desktop {
+      grid-template-columns: 1fr auto;
+      align-items: stretch;
+    }
   }
 
-  .hero__card {
-    border: 8px solid var(--color-black);
-    background-color: var(--color-white);
-    padding: var(--space-8);
-    box-shadow: var(--shadow-large);
+  /* ---------- Windows ---------- */
+
+  .hero__windows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
   }
 
-  @media (min-width: 48rem) {
-    .hero__card { padding: var(--space-12); }
+  .hero__readme {
+    position: relative;
+    max-width: 44rem;
   }
 
-  .hero__grid {
-    display: grid;
-    gap: var(--space-8);
-    align-items: center;
-    grid-template-columns: 1fr;
+  /* Title bars are drag handles on wide screens (see motion.ts). */
+  @media (min-width: 64rem) and (pointer: fine) {
+    .hero__windows :global(.window__titlebar) { cursor: grab; }
+    .hero__windows :global(.window__titlebar.is-dragging) { cursor: grabbing; }
   }
 
-  @media (min-width: 48rem) {
-    .hero__grid { grid-template-columns: 1fr 1fr; }
-  }
+  /* On wide screens the terminal overlaps the Read Me window, like two
+     windows left open on the desktop. */
+  @media (min-width: 64rem) {
+    .hero__windows { gap: 0; }
 
-  /* ---------------- Left column ---------------- */
-
-  .hero__badge {
-    display: inline-block;
-    border: var(--border-medium);
-    background-color: var(--color-green);
-    padding: var(--space-2) var(--space-4);
-    margin-bottom: var(--space-6);
-    font-weight: 700;
-    font-size: var(--text-sm);
+    .hero__terminal {
+      position: relative;
+      z-index: 1;
+      width: min(36rem, 70%);
+      margin-left: auto;
+      margin-top: calc(-1 * var(--space-12));
+    }
   }
 
   .hero__heading {
-    font-size: var(--text-5xl);
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: var(--space-4);
-  }
-
-  @media (min-width: 48rem) {
-    .hero__heading { font-size: var(--text-7xl); }
+    font-size: var(--text-hero);
+    line-height: 0.95;
+    margin-bottom: var(--space-5);
   }
 
   .hero__line {
@@ -131,92 +161,52 @@ import Icon from './Icon.astro';
   }
 
   .hero__tagline {
-    font-size: var(--text-xl);
-    font-weight: 700;
+    font-size: var(--text-lg);
+    max-width: 34ch;
     margin-bottom: var(--space-8);
   }
 
   @media (min-width: 48rem) {
-    .hero__tagline { font-size: var(--text-2xl); }
+    .hero__tagline { font-size: var(--text-xl); }
   }
 
   .hero__actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: var(--space-4);
   }
 
-  /* ---------------- Right column ---------------- */
-
-  .hero__illustration-frame {
-    position: relative;
-    border: 8px solid var(--color-black);
-    background-color: var(--color-white);
-    padding: var(--space-8);
+  .hero__terminal :global(.window__body) {
+    min-height: 9.5rem;
   }
 
-  /* The "computer screen" — black square with a green tint on top. */
-  .hero__screen {
-    position: relative;
-    aspect-ratio: 1;
-    border: var(--border-medium);
-    background-color: var(--color-black);
-    overflow: hidden;
+  /* ---------- Desktop icons ---------- */
+
+  .hero__icons {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     justify-content: center;
+    gap: var(--space-4);
   }
 
-  .hero__screen-tint {
-    position: absolute;
-    inset: var(--space-4);
-    background-color: var(--color-green);
-    opacity: 0.2;
+  /* The trash (an easter egg, see Trash.astro) only sits on the wide
+     desktop. It's a child component, hence :global. */
+  .hero__icons :global(.hero__trash) {
+    display: none;
   }
 
-  .hero__screen-content {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-  }
+  @media (min-width: 64rem) {
+    .hero__icons {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      gap: var(--space-6);
+    }
 
-  .hero__code {
-    color: var(--color-green);
-    font-weight: 700;
-    font-size: var(--text-6xl);
-    margin-bottom: var(--space-4);
-  }
-
-  .hero__dots {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-2);
-  }
-
-  .hero__dot {
-    width: 1rem;
-    height: 1rem;
-    background-color: var(--color-green);
-    display: block;
-  }
-
-  /* Decorative magenta + cyan squares, anchored to opposite corners. */
-  .hero__corner {
-    position: absolute;
-    width: 2rem;
-    height: 2rem;
-    border: var(--border-medium);
-  }
-
-  .hero__corner--magenta {
-    top: -1rem;
-    right: -1rem;
-    background-color: var(--color-magenta);
-  }
-
-  .hero__corner--cyan {
-    bottom: -1rem;
-    left: -1rem;
-    background-color: var(--color-cyan);
+    .hero__icons :global(.hero__trash) {
+      display: inline-flex;
+      margin-top: auto;
+    }
   }
 </style>

@@ -1,148 +1,193 @@
 ---
 /*
- * Navigation — sticky top bar with desktop links and a mobile menu.
+ * Menu bar — the System 1 strip across the top of the screen.
  *
- * The mobile menu's open/close state is handled by a small inline script
- * in BaseLayout.astro — this component only renders the markup and the
- * data attributes the script reads.
+ * The pixel duck plays the role of the Apple menu: it opens a pull-down
+ * with every section plus external links. On desktop the sections are
+ * also listed inline as menu titles; on mobile the duck menu is the whole
+ * navigation. On the right: a sun/moon theme toggle and a clock, like the
+ * menu bar extras of later System versions.
+ *
+ * Open/close and the clock are handled by the script in BaseLayout.astro;
+ * the theme toggle and "Panel de control…" by src/scripts/preferences.ts.
  */
 
-import { navItems } from '../data/portfolio';
+import { navItems, socialLinks } from '../data/portfolio';
+import PixelIcon from './PixelIcon.astro';
+
+const externalLinks = socialLinks.filter((link) => link.url.startsWith('http'));
 ---
 
-<nav class="nav">
-  <div class="nav__inner container">
-    <div class="nav__brand">
-      <span class="nav__brand-mark" aria-hidden="true">
-        <span class="nav__brand-dot"></span>
-      </span>
-      <span class="nav__brand-name">DEV.PORTFOLIO</span>
+<nav class="menubar" aria-label="Principal">
+  <div class="menubar__inner">
+    <div class="menubar__apple">
+      <button
+        type="button"
+        class="menubar__item menubar__duck"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-controls="duck-menu"
+        data-menu-button
+      >
+        <PixelIcon name="duck" scale={2} />
+        <span class="menubar__app">Alejo</span>
+      </button>
+
+      <div class="menubar__dropdown" id="duck-menu" data-menu hidden>
+        <a class="menubar__entry" href="#about">Acerca de Alejo…</a>
+        <button type="button" class="menubar__entry" data-open-preferences>Panel de control…</button>
+        <hr class="menubar__sep" />
+        {navItems.map((item) => (
+          <a class="menubar__entry" href={item.href}>{item.label}</a>
+        ))}
+        <hr class="menubar__sep" />
+        {externalLinks.map((link) => (
+          <a class="menubar__entry" href={link.url} target="_blank" rel="noopener noreferrer">
+            {link.label === 'github' ? 'GitHub' : 'LinkedIn'}
+          </a>
+        ))}
+      </div>
     </div>
 
-    {/* Desktop nav */}
-    <ul class="nav__list">
-      {navItems.map((item) => (
-        <li>
-          <a class="btn btn--secondary nav__link" href={item.href}>
-            {item.label}
-          </a>
-        </li>
+    <ul class="menubar__titles md-only">
+      {navItems.filter((item) => item.href !== '#hero').map((item) => (
+        <li><a class="menubar__item" href={item.href}>{item.label}</a></li>
       ))}
     </ul>
 
-    {/* Mobile menu button */}
-    <button
-      type="button"
-      class="nav__menu-button btn btn--secondary"
-      aria-label="Abrir menú"
-      aria-expanded="false"
-      data-menu-button
-    >
-      <span class="nav__menu-button-icon" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="4" x2="20" y1="6"  y2="6"  />
-          <line x1="4" x2="20" y1="12" y2="12" />
-          <line x1="4" x2="20" y1="18" y2="18" />
-        </svg>
-      </span>
+    <button type="button" class="menubar__item menubar__theme" data-theme-toggle aria-label="Cambiar tema">
+      <PixelIcon name="moon" scale={2} class="menubar__moon" />
+      <PixelIcon name="sun" scale={2} class="menubar__sun" />
     </button>
-  </div>
 
-  {/* Mobile menu — hidden by default, shown via [data-open="true"] */}
-  <div class="container nav__mobile" data-mobile-menu data-open="false">
-    {navItems.map((item) => (
-      <a class="btn btn--secondary nav__link nav__link--mobile" href={item.href}>
-        {item.label}
-      </a>
-    ))}
+    <time class="menubar__clock" data-clock aria-label="Hora local"></time>
   </div>
 </nav>
 
 <style>
-  /* The nav uses its own container width (a bit wider than section padding
-     so the brand and the menu have room to breathe). */
-
-  .nav {
+  .menubar {
     position: sticky;
     top: 0;
     z-index: 50;
-    background-color: var(--color-white);
-    border-bottom: var(--border-bottom-thick);
+    background-color: var(--paper);
+    border-bottom: var(--line);
+    font-family: var(--font-system);
+    font-size: var(--text-base);
   }
 
-  .nav__inner {
-    max-width: var(--container-wide);
+  .menubar__inner {
+    display: flex;
+    align-items: stretch;
+    height: var(--menubar-height);
+    padding-inline: var(--space-2);
+  }
+
+  .menubar__apple {
+    position: relative;
+    display: flex;
+  }
+
+  .menubar__titles {
+    display: flex;
+  }
+
+  /* Each menu title inverts when hovered or open — exactly like the Finder. */
+  .menubar__item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding-block: var(--space-4);
+    gap: var(--space-2);
+    height: 100%;
+    padding-inline: var(--space-3);
+    text-decoration: none;
   }
 
-  .nav__brand {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
+  .menubar__item:hover,
+  .menubar__duck[aria-expanded="true"] {
+    background-color: var(--ink);
+    color: var(--paper);
   }
 
-  /* The brand mark is a small black square with a green pixel inside —
-     a tiny visual pun on the "pixel art" theme. */
-  .nav__brand-mark {
-    width: 2.5rem;
-    height: 2.5rem;
-    border: var(--border-medium);
-    background-color: var(--color-black);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  .menubar__item:hover :global(svg),
+  .menubar__duck[aria-expanded="true"] :global(svg) {
+    filter: invert(1);
   }
 
-  .nav__brand-dot {
-    width: 0.75rem;
-    height: 0.75rem;
-    background-color: var(--color-green);
-    display: block;
+  .menubar__item:focus-visible {
+    outline-offset: -4px;
   }
 
-  .nav__brand-name {
-    font-size: var(--text-2xl);
+  .menubar__app {
     font-weight: 700;
   }
 
-  /* Desktop links only from md up; the hamburger + drawer cover mobile. */
-  .nav__list {
-    display: none;
-    gap: var(--space-2);
+  /* Shows the theme you'd switch to: a moon in light mode, a sun in dark. */
+  .menubar__theme {
+    margin-left: auto;
   }
 
-  .nav__link {
-    padding-block: var(--space-2);
-    padding-inline: var(--space-4);
+  /* The icons are PixelIcon children, so they're reached via :global. */
+  .menubar__theme :global(.menubar__sun) { display: none; }
+
+  :global(:root[data-theme="dark"]) .menubar__theme :global(.menubar__sun) { display: block; }
+  :global(:root[data-theme="dark"]) .menubar__theme :global(.menubar__moon) { display: none; }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme="light"])) .menubar__theme :global(.menubar__sun) { display: block; }
+    :global(:root:not([data-theme="light"])) .menubar__theme :global(.menubar__moon) { display: none; }
   }
 
-  .nav__menu-button {
-    padding: var(--space-2);
-  }
-
-  .nav__mobile {
-    display: none;
-    flex-direction: column;
-    gap: var(--space-2);
-    padding-block: var(--space-4);
-  }
-
-  .nav__mobile[data-open="true"] {
+  .menubar__clock {
     display: flex;
+    align-items: center;
+    padding-inline: var(--space-3);
   }
 
-  .nav__link--mobile {
-    width: 100%;
-    text-align: center;
+  /* ---------- Pull-down menu ---------- */
+
+  .menubar__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 15rem;
+    margin-top: var(--px);
+    padding-block: var(--space-1);
+    background-color: var(--paper);
+    border: var(--line);
+    box-shadow: var(--shadow-menu);
   }
 
-  @media (min-width: 48rem) {
-    .nav__list { display: flex; }
-    .nav__menu-button,
-    .nav__mobile[data-open="true"] { display: none; }
+  .menubar__dropdown:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menubar__entry {
+    padding: var(--space-1) var(--space-6);
+    text-align: left;
+    text-decoration: none;
+  }
+
+  .menubar__entry:hover,
+  .menubar__entry:focus-visible {
+    background-color: var(--ink);
+    color: var(--paper);
+    outline: none;
+  }
+
+  /* The chosen entry flashes twice before the menu closes. */
+  .menubar__entry.is-blinking {
+    animation: menu-blink 240ms steps(1, end);
+  }
+
+  @keyframes menu-blink {
+    0%, 50%  { background-color: var(--ink);   color: var(--paper); }
+    25%, 75% { background-color: var(--paper); color: var(--ink); }
+  }
+
+  /* The dotted separator lines of a classic Mac menu. */
+  .menubar__sep {
+    margin: var(--space-1) 0;
+    border: 0;
+    border-top: var(--px) dotted var(--ink);
   }
 </style>

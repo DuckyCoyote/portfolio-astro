@@ -1,88 +1,152 @@
 ---
 /*
- * Skills — four category cards in a row, plus a stats row at the bottom.
+ * Skills — a terminal session.
  *
- * Each category card has:
- *   • a colored header with the section title and icon
- *   • a cream body listing the technologies, each prefixed by a small
- *     black square "bullet"
+ *   $ neofetch          → ASCII duck + the headline stats as key/value rows
+ *   $ ls stack/         → one double-line TUI pane per skill category
  *
- * The stats row uses inverted colors (black background, green numbers)
- * to look like a worn arcade high-score panel.
+ * The neofetch colour blocks are the one place the old neon palette lives.
  */
 
-import { skillCategories, skillStats } from '../data/portfolio';
-import Icon from './Icon.astro';
-import type { SkillCategory } from '../data/portfolio';
+import { skillCategories, skillStats, heroContent } from '../data/portfolio';
+import Window from './Window.astro';
 
-const categories: SkillCategory[] = skillCategories;
+const PROMPT = 'alejo@portfolio:~/skills$';
+
+const DUCK = String.raw`
+    __
+___( o)>
+\ <_. )
+ '---'`.slice(1);
+
+const fetchRows = [
+  { key: 'Rol', value: heroContent.role },
+  ...skillStats.map((stat) => ({ key: stat.label, value: stat.value })),
+];
 ---
 
 <section id="skills" class="section skills">
   <div class="container">
+    <Window title="Skills y tecnologías" variant="terminal">
 
-    <header class="section-header">
-      <span class="section-header__icon section-header__icon--cream">
-        <Icon name="code-2" size={16} />
-      </span>
-      <h2 class="section-title">Skills &amp; Tecnologías</h2>
-    </header>
+      <div class="skills__session" data-typewriter>
+      <p class="term-line" data-kind="cmd"><span class="term-prompt">{PROMPT} </span><span data-text>neofetch</span></p>
 
-    <div class="grid skills__grid">
-      {categories.map((category) => (
-        <article class="card-flat skills__card hover-slide-up">
-          <header class={`skills__header ${category.colorClass}`}>
-            <Icon
-              name={
-                category.icon === 'layout'   ? 'layout'    :
-                category.icon === 'server'   ? 'server'    :
-                category.icon === 'mobile'   ? 'smartphone':
-                'zap'
-              }
-              size={28}
-            />
-            <h3 class="skills__title">{category.title}</h3>
-          </header>
-          <ul class="skills__list">
-            {category.skills.map((skill) => (
-              <li class="skills__item">
-                <span class="skills__bullet" aria-hidden="true"></span>
-                <span class="skills__name">{skill}</span>
-              </li>
+      <div class="skills__fetch">
+        <pre class="skills__duck" aria-hidden="true">{DUCK}</pre>
+        <div>
+          <p class="term-line skills__host">alejo<span class="term-dim">@</span>portfolio</p>
+          <p class="term-line term-dim" aria-hidden="true">─────────────────</p>
+          <dl class="skills__stats">
+            {fetchRows.map((row) => (
+              <div class="skills__stat">
+                <dt>{row.key}</dt>
+                <dd>{row.value}</dd>
+              </div>
             ))}
-          </ul>
-        </article>
-      ))}
-    </div>
-
-    {/* Stats row */}
-    <div class="grid grid--4 skills__stats">
-      {skillStats.map((stat) => (
-        <div class="skills__stat">
-          <div class="skills__stat-value text-green">{stat.value}</div>
-          <div class="skills__stat-label text-white">{stat.label}</div>
+          </dl>
+          <div class="skills__palette" aria-hidden="true">
+            <span style="background: var(--term-bg); outline: 1px solid var(--term-dim);"></span>
+            <span style="background: var(--term-fg);"></span>
+            <span style="background: var(--neon-yellow);"></span>
+            <span style="background: var(--neon-magenta);"></span>
+            <span style="background: var(--neon-cyan);"></span>
+            <span style="background: var(--neon-coral);"></span>
+            <span style="background: var(--term-bright);"></span>
+          </div>
         </div>
-      ))}
-    </div>
+      </div>
 
+      <p class="term-line" data-kind="cmd"><span class="term-prompt">{PROMPT} </span><span data-text>ls stack/</span></p>
+
+      <div class="skills__grid" data-stagger>
+        {skillCategories.map((category) => (
+          <div class="tui-box">
+            <h3 class="tui-box__title">{category.title}</h3>
+            <ul class="skills__list">
+              {category.skills.map((skill) => (
+                <li><span class="term-dim" aria-hidden="true">›</span> {skill}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      <p class="term-line"><span class="term-prompt">{PROMPT}</span> <span class="term-cursor" aria-hidden="true"></span></p>
+      </div>
+
+    </Window>
   </div>
 </section>
 
 <style>
-  /* The Skills section has a white background to break up the page —
-     sandwiched between the cream About and Experience sections. */
-  .skills {
-    background-color: var(--color-white);
-    border-top: var(--border-bottom-thick);
-    border-bottom: var(--border-bottom-thick);
+  .skills__session {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
   }
 
-  /* ---------- Category card ---------- */
-
-  /* 1 → 2 → 4 columns (the stats row below uses the 2 → 4 .grid--4). */
-  .skills__grid { grid-template-columns: 1fr; }
-
   @media (min-width: 48rem) {
+    .skills :global(.window__body) { padding: var(--space-8); }
+  }
+
+  /* ---------- neofetch ---------- */
+
+  .skills__fetch {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--space-4) var(--space-10);
+    margin-bottom: var(--space-4);
+  }
+
+  .skills__duck {
+    margin: 0;
+    font: inherit;
+    font-size: 1.3em;
+    line-height: 1.05;
+    color: var(--term-fg);
+  }
+
+  .skills__host {
+    color: var(--term-bright);
+  }
+
+  .skills__stats {
+    display: grid;
+    gap: 0;
+  }
+
+  .skills__stat {
+    display: grid;
+    grid-template-columns: 10ch 1fr;
+  }
+
+  .skills__stat dt {
+    color: var(--term-bright);
+  }
+
+  .skills__palette {
+    display: flex;
+    gap: 0;
+    margin-top: var(--space-3);
+  }
+
+  .skills__palette span {
+    width: 2rem;
+    height: 1.1rem;
+  }
+
+  /* ---------- Category panes ---------- */
+
+  .skills__grid {
+    display: grid;
+    gap: var(--space-6) var(--space-4);
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  @media (min-width: 40rem) {
     .skills__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
@@ -90,68 +154,8 @@ const categories: SkillCategory[] = skillCategories;
     .skills__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   }
 
-  .skills__header {
-    border-bottom: var(--border-bottom-thick);
-    padding: var(--space-4);
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  .skills__title {
-    font-size: var(--text-xl);
-    font-weight: 700;
-  }
-
   .skills__list {
-    padding: var(--space-4);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .skills__item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .skills__bullet {
-    width: 0.75rem;
-    height: 0.75rem;
-    background-color: var(--color-black);
-    border: 2px solid var(--color-black);
-  }
-
-  .skills__name {
-    font-weight: 700;
-  }
-
-  /* ---------- Stats row ---------- */
-
-  .skills__stats {
-    margin-top: var(--space-12);
-    gap: var(--space-4);
-  }
-
-  .skills__stat {
-    border: var(--border-medium);
-    background-color: var(--color-black);
-    text-align: center;
-    padding: var(--space-6);
-  }
-
-  .skills__stat-value {
-    font-size: var(--text-3xl);
-    font-weight: 700;
-    margin-bottom: var(--space-2);
-  }
-
-  @media (min-width: 48rem) {
-    .skills__stat-value { font-size: var(--text-4xl); }
-  }
-
-  .skills__stat-label {
-    font-weight: 700;
+    display: grid;
+    gap: var(--space-1);
   }
 </style>

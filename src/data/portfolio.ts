@@ -27,11 +27,12 @@ export const navItems = [
 /* ------------------------------------------------------------------ */
 
 export const heroContent = {
-  badge: '> DISPONIBLE PARA PROGRAMAR',
   greeting: 'Hola.',
   name: 'Soy Alejo.',
+  role: 'Full Stack Developer',
+  status: 'Disponible para programar',
   tagline: 'Full Stack Developer especializado en crear experiencias digitales únicas',
-  primaryCta: { label: 'Ver Proyectos', href: '#projects' },
+  primaryCta: { label: 'Ver proyectos', href: '#projects' },
   secondaryCta: { label: 'Contáctame', href: '#contact' },
 };
 
@@ -45,10 +46,12 @@ export const aboutContent = {
     'Soy Alejandro Daniel Cruz Hernandez, un desarrollador Full Stack con pasión por crear aplicaciones web modernas y funcionales. Mi viaje en la programación comenzó hace más de 2 años, y desde entonces no he parado de aprender y mejorar mis habilidades.',
     'Me especializo en construir experiencias de usuario excepcionales con tecnologías modernas, siempre buscando el equilibrio perfecto entre diseño y funcionalidad.',
   ],
+  /* Rendered as a Mac "Get Info" panel: label → value. */
   facts: [
-    { icon: 'code',   text: '2+ años programando' },
-    { icon: 'coffee', text: '∞ cafés consumidos' },
-    { icon: 'heart',  text: 'Apasionado por el código limpio' },
+    { label: 'Tipo',        value: 'Desarrollador Full Stack' },
+    { label: 'Experiencia', value: '2+ años programando' },
+    { label: 'Combustible', value: '∞ cafés consumidos' },
+    { label: 'Pasión',      value: 'El código limpio' },
   ],
   level: 'Mid Developer',
   levelProgress: 85,
@@ -61,34 +64,24 @@ export const aboutContent = {
 
 export type SkillCategory = {
   title: string;
-  icon: 'layout' | 'server' | 'mobile' | 'tools';
-  colorClass: string;        // see styles/utilities.css (`bg-green`, etc.)
   skills: string[];
 };
 
 export const skillCategories: SkillCategory[] = [
   {
     title: 'Frontend',
-    icon: 'layout',
-    colorClass: 'bg-green',
     skills: ['Angular.js', 'React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'HTML/CSS'],
   },
   {
     title: 'Backend',
-    icon: 'server',
-    colorClass: 'bg-magenta',
     skills: ['Node.js', 'Java', 'Express', 'PostgreSQL', 'Spring Boot', 'REST APIs'],
   },
   {
     title: 'Mobile',
-    icon: 'mobile',
-    colorClass: 'bg-cyan',
     skills: ['React Native', 'Flutter', 'iOS', 'Android', 'Expo', 'PWA'],
   },
   {
     title: 'Herramientas',
-    icon: 'tools',
-    colorClass: 'bg-yellow',
     skills: ['Git', 'Docker', 'AWS', 'Figma', 'Kubernetes', 'CI/CD'],
   },
 ];
@@ -110,7 +103,6 @@ export type Experience = {
   period: string;
   description: string;
   technologies: string[];
-  colorClass: string;
 };
 
 export const experiences: Experience[] = [
@@ -121,7 +113,6 @@ export const experiences: Experience[] = [
     description:
       'Trabajo con equipo de desarrollo, arquitectura de aplicaciones escalables, y desarrollo de software.',
     technologies: ['Angular.Js', 'Node.js', 'AWS', 'MySQL'],
-    colorClass: 'bg-green',
   },
   {
     title: 'Full Stack Developer',
@@ -130,7 +121,6 @@ export const experiences: Experience[] = [
     description:
       'Desarrollo de aplicaciones web completas, implementación de APIs RESTful, y optimización de rendimiento.',
     technologies: ['Angular.Js', 'Spring Boot', 'PostgreSQL', 'Red Hat'],
-    colorClass: 'bg-cyan',
   },
   {
     title: 'Full Stack Developer',
@@ -139,7 +129,6 @@ export const experiences: Experience[] = [
     description:
       'Creación de interfaces de usuario interactivas, implementación de diseños responsive, y desarrollo de API REST.',
     technologies: ['React', 'TypeScript', 'Express.Js', 'MySQL'],
-    colorClass: 'bg-magenta',
   },
 ];
 
@@ -154,7 +143,6 @@ export type Project = {
   image: string;       // empty string falls back to the generic project image
   link: string;
   github: string;
-  colorClass: string;
 };
 
 /* The generic project image is used as a fallback for projects without a
@@ -170,7 +158,6 @@ export const projects: Project[] = [
     image: '/images/so-project.webp',
     link: 'https://so-simulation.netlify.app',
     github: 'https://github.com/DuckyCoyote/SO-simulation',
-    colorClass: 'bg-yellow',
   },
   {
     title: 'Server Monitoring Dashboard',
@@ -180,7 +167,6 @@ export const projects: Project[] = [
     image: '/images/server-manager.png',
     link: 'https://servermanagerfront.netlify.app',
     github: 'https://github.com/DuckyCoyote/server-manager-front',
-    colorClass: 'bg-green',
   },
   {
     title: 'Task Manager Pro',
@@ -190,7 +176,6 @@ export const projects: Project[] = [
     image: '',
     link: '#',
     github: '#',
-    colorClass: 'bg-cyan',
   },
   {
     title: 'Social Media Dashboard',
@@ -200,7 +185,6 @@ export const projects: Project[] = [
     image: '',
     link: '#',
     github: '#',
-    colorClass: 'bg-magenta',
   },
   {
     title: 'Portfolio Builder',
@@ -210,7 +194,6 @@ export const projects: Project[] = [
     image: '',
     link: '#',
     github: '#',
-    colorClass: 'bg-coral',
   },
   {
     title: 'Fitness Tracker',
@@ -220,7 +203,6 @@ export const projects: Project[] = [
     image: '',
     link: '#',
     github: '#',
-    colorClass: 'bg-teal',
   },
 ];
 
@@ -228,25 +210,42 @@ export const projects: Project[] = [
 /*  Contact                                                             */
 /* ------------------------------------------------------------------ */
 
+/* Shown as `key  value` rows in the contact terminal. */
 export type SocialLink = {
   label: string;
+  handle: string;
   url: string;
-  icon: 'github' | 'linkedin' | 'twitter' | 'mail';
-  colorClass: string;
 };
 
+export const contactEmail = 'daniel_719021@hotmail.es';
+
 export const socialLinks: SocialLink[] = [
-  { label: 'GitHub',   url: 'https://github.com/DuckyCoyote', icon: 'github',   colorClass: 'bg-green'   },
-  { label: 'LinkedIn', url: 'https://www.linkedin.com/in/alejandro-daniel-cruz-hernández-05bb0b200', icon: 'linkedin', colorClass: 'bg-cyan' },
-  { label: 'Twitter',  url: '#contact', icon: 'twitter', colorClass: 'bg-magenta' },
-  { label: 'Email',    url: '#contact', icon: 'mail',    colorClass: 'bg-yellow' },
+  { label: 'email',    handle: contactEmail,                          url: `mailto:${contactEmail}` },
+  { label: 'github',   handle: 'github.com/DuckyCoyote',              url: 'https://github.com/DuckyCoyote' },
+  { label: 'linkedin', handle: 'in/alejandro-daniel-cruz-hernández',  url: 'https://www.linkedin.com/in/alejandro-daniel-cruz-hernández-05bb0b200' },
 ];
 
-/* Email where messages are delivered. Pulled from the original component. */
-export const contactEmail = 'daniel_719021@hotmail.es';
 export const contactPhone = '+34 123 456 789';
 export const contactIntro =
   'Estoy disponible para proyectos freelance, colaboraciones o posiciones full-time. No dudes en contactarme si tienes una idea interesante.';
+
+/* ------------------------------------------------------------------ */
+/*  Trash — the easter egg behind the desktop's Papelera icon           */
+/* ------------------------------------------------------------------ */
+
+export type TrashItem = {
+  name: string;
+  icon: 'document' | 'folder';
+  note: string;   // shown in the window's status strip when selected
+};
+
+export const trashItems: TrashItem[] = [
+  { name: 'hola_mundo.html', icon: 'document', note: 'Mi primer programa. Funcionaba en mi máquina.' },
+  { name: 'node_modules',    icon: 'folder',   note: 'Pesaba más que el proyecto entero.' },
+  { name: 'TODO.txt',        icon: 'document', note: '"Lo arreglo después." Nunca fue después.' },
+  { name: 'estilos.css',     icon: 'document', note: '214 usos de !important. Especificidad: sí.' },
+  { name: 'deploy_viernes.sh', icon: 'document', note: 'Ejecutado un viernes a las 18:00. Nunca más.' },
+];
 
 /* ------------------------------------------------------------------ */
 /*  Misc                                                                */

@@ -1,116 +1,136 @@
 ---
 /*
- * Projects — a grid of project cards.
+ * Projects — a Finder window full of documents.
  *
- * Each card has:
- *   • a colored top strip with the title
- *   • a screenshot area (falls back to a generic image)
- *   • description + tech tags + View / Code buttons
+ * Each project is a framed card: name + status strip, a screenshot, the
+ * description, tech tags and two Mac buttons. Screenshots render in
+ * greyscale to match the 1-bit desktop and get their colour back on hover
+ * (only on devices that can hover, so touch screens always see colour).
  *
- * Hovering lifts the card slightly. Empty image sources use the
- * fallback image defined in the data file.
+ * Projects whose links are still "#" are marked "En desarrollo" and their
+ * buttons are dimmed like unavailable menu commands.
  */
 
 import { projects, FALLBACK_PROJECT_IMAGE } from '../data/portfolio';
-import Icon from './Icon.astro';
+import Window from './Window.astro';
+
+const isLive = (url: string) => url !== '#';
+const liveCount = projects.filter((project) => isLive(project.link)).length;
 ---
 
-<section id="projects" class="section projects">
+<section id="projects" class="section">
   <div class="container">
+    <Window
+      title="Proyectos"
+      info={[
+        `${projects.length} proyectos`,
+        `${liveCount} publicados`,
+        `${projects.length - liveCount} en desarrollo`,
+      ]}
+    >
+      <ul class="projects__grid">
+        {projects.map((project) => {
+          const live = isLive(project.link);
+          const hasCode = isLive(project.github);
+          return (
+            <li class="projects__card">
+              <header class="projects__head">
+                <h3 class="projects__title">{project.title}</h3>
+                <span class="projects__status">{live ? 'Publicado' : 'En desarrollo'}</span>
+              </header>
 
-    <header class="section-header">
-      <span class="section-header__icon section-header__icon--cream">
-        <Icon name="folder" size={16} />
-      </span>
-      <h2 class="section-title">Proyectos</h2>
-    </header>
-
-    <div class="grid grid--3 projects__grid">
-      {projects.map((project) => {
-        const imageSrc = project.image || FALLBACK_PROJECT_IMAGE;
-        const safeLink = project.link === '#' ? undefined : project.link;
-        const safeGithub = project.github === '#' ? undefined : project.github;
-        return (
-          <article class="card-flat projects__card hover-slide-up">
-
-            <header class={`projects__head ${project.colorClass}`}>
-              <h3 class="projects__title">{project.title}</h3>
-            </header>
-
-            <div class="projects__image-wrap">
-              <img
-                class="projects__image"
-                src={imageSrc}
-                alt={`Captura del proyecto ${project.title}`}
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-
-            <div class="projects__body">
-              <p class="projects__description">{project.description}</p>
-
-              <div class="projects__technologies">
-                {project.technologies.map((tech) => (
-                  <span class="tag">{tech}</span>
-                ))}
+              <div class="projects__image-wrap">
+                <img
+                  class="projects__image"
+                  src={project.image || FALLBACK_PROJECT_IMAGE}
+                  alt={`Captura del proyecto ${project.title}`}
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
 
-              <div class="projects__links">
-                <a
-                  class="btn btn--primary flex-1 projects__button"
-                  href={safeLink ?? '#'}
-                  aria-disabled={!safeLink}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <Icon name="external-link" size={16} />
-                  Ver
-                </a>
-                <a
-                  class="btn btn--secondary flex-1 projects__button"
-                  href={safeGithub ?? '#'}
-                  aria-disabled={!safeGithub}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <Icon name="github" size={16} />
-                  Código
-                </a>
+              <div class="projects__body">
+                <p class="projects__description">{project.description}</p>
+
+                <ul class="projects__technologies" aria-label="Tecnologías">
+                  {project.technologies.map((tech) => <li class="tag">{tech}</li>)}
+                </ul>
+
+                <div class="projects__links">
+                  <a
+                    class="btn btn--default flex-1"
+                    href={live ? project.link : undefined}
+                    aria-disabled={live ? undefined : 'true'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Abrir
+                  </a>
+                  <a
+                    class="btn flex-1"
+                    href={hasCode ? project.github : undefined}
+                    aria-disabled={hasCode ? undefined : 'true'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Código
+                  </a>
+                </div>
               </div>
-            </div>
-
-          </article>
-        );
-      })}
-    </div>
-
+            </li>
+          );
+        })}
+      </ul>
+    </Window>
   </div>
 </section>
 
 <style>
-  /* Same white sandwich as the Skills section to break up the page. */
-  .projects {
-    background-color: var(--color-white);
-    border-top: var(--border-bottom-thick);
-    border-bottom: var(--border-bottom-thick);
+  .projects__grid {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 40rem) {
+    .projects__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (min-width: 64rem) {
+    .projects__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  .projects__card {
+    display: flex;
+    flex-direction: column;
+    border: var(--line);
+    box-shadow: var(--shadow-window);
+    background-color: var(--paper);
   }
 
   .projects__head {
-    border-bottom: var(--border-bottom-thick);
-    padding: var(--space-4);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: var(--line);
   }
 
   .projects__title {
-    font-size: var(--text-xl);
-    font-weight: 700;
+    font-size: var(--text-lg);
+  }
+
+  .projects__status {
+    flex-shrink: 0;
+    font-family: var(--font-system);
+    font-size: var(--text-xs);
   }
 
   .projects__image-wrap {
-    border-bottom: var(--border-bottom-thick);
-    height: 12rem;
-    background-color: var(--color-white);
+    aspect-ratio: 16 / 10;
+    border-bottom: var(--line);
     overflow: hidden;
+    background-color: var(--paper);
   }
 
   .projects__image {
@@ -119,7 +139,22 @@ import Icon from './Icon.astro';
     object-fit: cover;
   }
 
+  @media (hover: hover) {
+    .projects__image {
+      filter: grayscale(1) contrast(1.15);
+      transition: filter 200ms steps(3);
+    }
+
+    .projects__card:hover .projects__image,
+    .projects__card:focus-within .projects__image {
+      filter: none;
+    }
+  }
+
   .projects__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     padding: var(--space-4);
   }
 
@@ -132,22 +167,13 @@ import Icon from './Icon.astro';
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
   }
 
   .projects__links {
     display: flex;
-    gap: var(--space-2);
-  }
-
-  .projects__button {
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--text-sm);
-  }
-
-  /* "#" links should look distinctly disabled. */
-  a[aria-disabled="true"] {
-    opacity: 0.5;
-    pointer-events: none;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: auto;
   }
 </style>

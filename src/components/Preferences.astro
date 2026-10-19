@@ -1,0 +1,129 @@
+---
+/*
+ * Panel de control — a native <dialog> dressed as a Mac dialog box.
+ *
+ * Two settings, both applied instantly and remembered in localStorage:
+ *   • Apariencia: follow the OS, or force light / dark.
+ *   • Fuente de la terminal: VT323 (CRT), IBM Plex Mono or JetBrains Mono.
+ *
+ * Opened from the duck menu; behavior lives in src/scripts/preferences.ts.
+ */
+
+import PixelIcon from './PixelIcon.astro';
+import { THEME_OPTIONS, TERMINAL_FONT_OPTIONS } from '../scripts/preferences-options';
+---
+
+<dialog class="dialog prefs" aria-labelledby="prefs-title" data-preferences>
+  <form method="dialog" class="prefs__form">
+    <header class="prefs__head">
+      <PixelIcon name="computer" scale={3} />
+      <div>
+        <h2 class="prefs__title" id="prefs-title">Panel de control</h2>
+        <p class="prefs__lead">Los cambios se guardan en este navegador.</p>
+      </div>
+    </header>
+
+    <fieldset class="prefs__group">
+      <legend class="prefs__legend">Apariencia</legend>
+      {THEME_OPTIONS.map((option) => (
+        <label class="radio">
+          <input type="radio" name="theme" value={option.value} data-pref-theme />
+          <span>{option.label}</span>
+        </label>
+      ))}
+    </fieldset>
+
+    <fieldset class="prefs__group">
+      <legend class="prefs__legend">Fuente de la terminal</legend>
+      {TERMINAL_FONT_OPTIONS.map((option) => (
+        <label class="radio prefs__font">
+          <input type="radio" name="terminal-font" value={option.value} data-pref-font />
+          <span class="prefs__font-name">{option.label}</span>
+          <span class="prefs__sample" style={`font-family: ${option.family}; font-size: ${option.sampleSize};`} aria-hidden="true">
+            alejo@portfolio:~$ ls
+          </span>
+        </label>
+      ))}
+    </fieldset>
+
+    <div class="prefs__actions">
+      <button class="btn btn--default" value="close">Listo</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  import '../scripts/preferences';
+</script>
+
+<style>
+  .prefs {
+    width: min(34rem, calc(100% - 2rem));
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+  }
+
+  .prefs::backdrop {
+    background: transparent;
+  }
+
+  .prefs__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .prefs__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .prefs__title {
+    font-size: var(--text-xl);
+  }
+
+  .prefs__lead {
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+
+  .prefs__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: var(--space-4);
+    border: var(--line);
+  }
+
+  .prefs__legend {
+    padding-inline: var(--space-2);
+    font-family: var(--font-system);
+    font-weight: 700;
+  }
+
+  .prefs__font {
+    flex-wrap: wrap;
+  }
+
+  .prefs__font-name {
+    min-width: 9rem;
+  }
+
+  /* Each option previews itself on a tiny CRT. */
+  .prefs__sample {
+    flex: 1;
+    min-width: 12rem;
+    padding: var(--space-1) var(--space-3);
+    background-color: var(--term-bg);
+    color: var(--term-fg);
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+
+  .prefs__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+</style>

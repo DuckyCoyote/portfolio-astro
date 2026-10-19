@@ -1,0 +1,211 @@
+---
+/*
+ * 1-bit pixel icons, drawn from ASCII grids.
+ *
+ *   X = black pixel   o = white pixel   . = transparent
+ *
+ * Each row is turned into horizontal runs of <rect>s so the SVG stays tiny
+ * and crisp at any integer scale. White pixels matter: they keep icons
+ * readable on top of the dithered desktop. Both colours come from the
+ * theme tokens (see .px-ink / .px-paper in components.css), so icons
+ * invert with the dark theme.
+ */
+
+export type PixelIconName =
+  'duck' | 'folder' | 'document' | 'mail' | 'disk' | 'trash' | 'trash-full' | 'computer' | 'moon' | 'sun';
+
+interface Props {
+  name: PixelIconName;
+  /** CSS pixels per icon pixel. */
+  scale?: number;
+  class?: string;
+}
+
+const { name, scale = 2, class: className = '' } = Astro.props;
+
+const GRIDS: Record<PixelIconName, string[]> = {
+  duck: [
+    '......XXXX......',
+    '.....XXXXXX.....',
+    '....XX.XXXXX....',
+    '..XXXXXXXXXX....',
+    '.XXXXXXXXXX.....',
+    '....XXXXXX......',
+    '.....XXXX.......',
+    '....XXXXXXXXXXX.',
+    '...XXXXXXXXXXXXX',
+    '...XXXXXXXXXXXXX',
+    '...XXXXXXXXXXXX.',
+    '....XXXXXXXXXX..',
+    '.....XXXXXXXX...',
+  ],
+  folder: [
+    '.XXXXX..........',
+    'XoooooX.........',
+    'XooooooXXXXXXXX.',
+    'XXXXXXXXXXXXXXXX',
+    'XooooooooooooooX',
+    'XooooooooooooooX',
+    'XooooooooooooooX',
+    'XooooooooooooooX',
+    'XooooooooooooooX',
+    'XooooooooooooooX',
+    'XooooooooooooooX',
+    'XXXXXXXXXXXXXXXX',
+  ],
+  document: [
+    'XXXXXXXXXX...',
+    'XooooooooXX..',
+    'XooooooooXoX.',
+    'XooooooooXooX',
+    'XooooooooXXXX',
+    'XoooooooooooX',
+    'XoXXXXXXXXooX',
+    'XoooooooooooX',
+    'XoXXXXXXXXXoX',
+    'XoooooooooooX',
+    'XoXXXXXXXoooX',
+    'XoooooooooooX',
+    'XoXXXXXXXXXoX',
+    'XoooooooooooX',
+    'XoooooooooooX',
+    'XXXXXXXXXXXXX',
+  ],
+  mail: [
+    'XXXXXXXXXXXXXXXX',
+    'XXooooooooooooXX',
+    'XoXooooooooooXoX',
+    'XooXooooooooXooX',
+    'XoooXooooooXoooX',
+    'XooooXooooXooooX',
+    'XoooooXXXXoooooX',
+    'XooooooooooooooX',
+    'XooooooooooooooX',
+    'XXXXXXXXXXXXXXXX',
+  ],
+  disk: [
+    'XXXXXXXXXXXXXXXX',
+    'XooooooooooooooX',
+    'XooooooooooooooX',
+    'XooooooooooooooX',
+    'XooooooooooXXooX',
+    'XooooooooooooooX',
+    'XXXXXXXXXXXXXXXX',
+    '.XX..........XX.',
+  ],
+  /* Empty and full trash share a size so swapping them doesn't shift the
+     desktop: the empty one is padded where the full one has paper. */
+  trash: [
+    '..............',
+    '..............',
+    '..............',
+    '..............',
+    '.....XXXX.....',
+    'XXXXXXXXXXXXXX',
+    'XooooooooooooX',
+    'XXXXXXXXXXXXXX',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XooooooooooX.',
+    '.XXXXXXXXXXXX.',
+  ],
+  'trash-full': [
+    '....XXX.XXX...',
+    '...XoooXoooX..',
+    '..XoooXoXooX..',
+    '...XXXX.XXX...',
+    '.....XXXX.....',
+    'XXXXXXXXXXXXXX',
+    'XooooooooooooX',
+    'XXXXXXXXXXXXXX',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XoXooXooXooX.',
+    '.XooooooooooX.',
+    '.XXXXXXXXXXXX.',
+  ],
+  moon: [
+    '...XXXX....',
+    '.XXXX......',
+    '.XXX.......',
+    'XXX........',
+    'XXX........',
+    'XXX........',
+    'XXXX.......',
+    '.XXXX....X.',
+    '.XXXXXXXXX.',
+    '...XXXXX...',
+  ],
+  sun: [
+    '.....X.....',
+    '.X...X...X.',
+    '..X.....X..',
+    '....XXX....',
+    '...XXXXX...',
+    'XX.XXXXX.XX',
+    '...XXXXX...',
+    '....XXX....',
+    '..X.....X..',
+    '.X...X...X.',
+    '.....X.....',
+  ],
+  computer: [
+    '.XXXXXXXXXXXX.',
+    'XooooooooooooX',
+    'XoXXXXXXXXXXoX',
+    'XoXooooooooXoX',
+    'XoXoXooooooXoX',
+    'XoXooXoooooXoX',
+    'XoXoXooXXooXoX',
+    'XoXooooooooXoX',
+    'XoXXXXXXXXXXoX',
+    'XooooooooooooX',
+    'XooooooXXXXooX',
+    'XooooooooooooX',
+    'XXXXXXXXXXXXXX',
+    'XooooooooooooX',
+    'XXXXXXXXXXXXXX',
+  ],
+};
+
+const rows = GRIDS[name];
+const width = Math.max(...rows.map((r) => r.length));
+const height = rows.length;
+
+type Run = { x: number; y: number; w: number; tone: 'px-ink' | 'px-paper' };
+const runs: Run[] = [];
+rows.forEach((row, y) => {
+  let x = 0;
+  while (x < row.length) {
+    const ch = row[x];
+    if (ch === '.') { x++; continue; }
+    let end = x;
+    while (end < row.length && row[end] === ch) end++;
+    runs.push({ x, y, w: end - x, tone: ch === 'X' ? 'px-ink' : 'px-paper' });
+    x = end;
+  }
+});
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width={width * scale}
+  height={height * scale}
+  viewBox={`0 0 ${width} ${height}`}
+  shape-rendering="crispEdges"
+  class={className}
+  aria-hidden="true"
+>
+  {runs.map((r) => <rect x={r.x} y={r.y} width={r.w} height="1" class={r.tone} />)}
+</svg>

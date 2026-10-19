@@ -1,68 +1,70 @@
 ---
 /*
- * About — personal story on the left, "fact cards" + level meter on the right.
+ * About — the story on the left, a Mac "Get Info" panel on the right.
  *
- * The fact cards each show an icon and one line. Hovering slides them
- * slightly to the right (a nod to neobrutalism's playful motion).
+ * Get Info is how the Finder describes a file: icon + name on top, then
+ * right-aligned labels ("Kind:", "Size:") with their values. Here it
+ * describes Alejo, and ends with the XP bar drawn as a dithered progress
+ * bar.
  */
 
-import { aboutContent } from '../data/portfolio';
-import Icon from './Icon.astro';
-
-const factsWithIcons = aboutContent.facts.map((fact) => ({
-  ...fact,
-  iconName: fact.icon as 'code' | 'coffee' | 'heart',
-}));
+import { aboutContent, siteMeta, heroContent } from '../data/portfolio';
+import Window from './Window.astro';
+import PixelIcon from './PixelIcon.astro';
 ---
 
 <section id="about" class="section">
   <div class="container">
+    <Window title={aboutContent.title} info={[siteMeta.author, aboutContent.level]}>
+      <div class="about__grid">
 
-    <header class="section-header">
-      <span class="section-header__icon">
-        <Icon name="user" size={16} />
-      </span>
-      <h2 class="section-title">{aboutContent.title}</h2>
-    </header>
+        <article class="about__story">
+          <h3 class="about__story-title">Mi historia</h3>
+          {aboutContent.paragraphs.map((paragraph) => (
+            <p class="about__paragraph">{paragraph}</p>
+          ))}
+        </article>
 
-    <div class="about__grid">
-
-      {/* ---------- Story column ---------- */}
-      <article class="card about__story">
-        <h3 class="about__story-title">Mi Historia</h3>
-        {aboutContent.paragraphs.map((paragraph) => (
-          <p class="about__paragraph">{paragraph}</p>
-        ))}
-      </article>
-
-      {/* ---------- Facts + level column ---------- */}
-      <div class="about__facts">
-        {factsWithIcons.map((fact) => (
-          <div class="about__fact">
-            <span class="about__fact-icon">
-              <Icon name={fact.iconName} size={32} />
-            </span>
-            <span class="about__fact-text">{fact.text}</span>
-          </div>
-        ))}
-
-        <div class="about__level bg-white border-4">
-          <div class="about__level-row">
-            <span class="about__level-label">LEVEL:</span>
-            <span class="about__level-value">{aboutContent.level}</span>
-          </div>
-          <div class="about__level-bar">
-            <div
-              class="about__level-fill"
-              style={`width: ${aboutContent.levelProgress}%;`}
-            >
-              <span class="about__level-fill-label">{aboutContent.levelLabel}</span>
+        <aside class="about__info" aria-labelledby="about-info-title">
+          <header class="about__info-head">
+            <PixelIcon name="computer" scale={3} />
+            <div>
+              <h3 class="about__info-name" id="about-info-title">Alejo</h3>
+              <p class="about__info-kind">Información</p>
             </div>
-          </div>
-        </div>
-      </div>
+          </header>
 
-    </div>
+          <dl class="about__facts">
+            {aboutContent.facts.map((fact) => (
+              <div class="about__fact">
+                <dt>{fact.label}:</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+            <div class="about__fact">
+              <dt>Nivel:</dt>
+              <dd>
+                {aboutContent.level}
+                <div
+                  class="about__meter"
+                  role="meter"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow={aboutContent.levelProgress}
+                  aria-label={`Experiencia: ${aboutContent.levelLabel}`}
+                >
+                  <span class="about__meter-fill" style={`width: ${aboutContent.levelProgress}%;`}></span>
+                </div>
+                <span class="about__meter-label">{aboutContent.levelLabel}</span>
+              </dd>
+            </div>
+          </dl>
+
+          <p class="about__info-note">{heroContent.status}</p>
+        </aside>
+
+      </div>
+    </Window>
   </div>
 </section>
 
@@ -70,110 +72,104 @@ const factsWithIcons = aboutContent.facts.map((fact) => ({
   .about__grid {
     display: grid;
     gap: var(--space-8);
-    grid-template-columns: 1fr;
   }
 
-  @media (min-width: 48rem) {
-    .about__grid { grid-template-columns: 1fr 1fr; }
+  @media (min-width: 56rem) {
+    .about__grid {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: var(--space-12);
+    }
   }
 
   /* ---------- Story ---------- */
 
-  .about__story {
-    padding: var(--space-8);
-    box-shadow: var(--shadow-medium);
-  }
-
   .about__story-title {
-    font-size: var(--text-2xl);
-    font-weight: 700;
+    font-size: var(--text-xl);
     margin-bottom: var(--space-4);
-    padding-bottom: var(--space-4);
-    border-bottom: var(--border-bottom-thick);
   }
 
   .about__paragraph {
     font-size: var(--text-lg);
+    max-width: 62ch;
   }
 
   .about__paragraph + .about__paragraph {
     margin-top: var(--space-4);
   }
 
-  /* ---------- Facts ---------- */
+  /* ---------- Get Info panel ---------- */
+
+  .about__info {
+    align-self: start;
+    border: var(--line);
+    box-shadow: var(--shadow-window);
+    padding: var(--space-5);
+    font-family: var(--font-system);
+  }
+
+  .about__info-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-4);
+    border-bottom: var(--px) dotted var(--ink);
+  }
+
+  .about__info-name {
+    font-size: var(--text-xl);
+  }
+
+  .about__info-kind {
+    font-size: var(--text-sm);
+  }
 
   .about__facts {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+    display: grid;
+    gap: var(--space-2);
   }
 
   .about__fact {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    border: var(--border-medium);
-    background-color: var(--color-green);
-    padding: var(--space-6);
-    transition: var(--transition-transform);
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: var(--space-3);
   }
 
-  .about__fact:hover {
-    transform: translateX(8px);
-  }
-
-  .about__fact-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: var(--border-medium);
-    background-color: var(--color-white);
-    padding: var(--space-3);
-  }
-
-  .about__fact-text {
-    font-size: var(--text-xl);
+  .about__fact dt {
+    text-align: right;
     font-weight: 700;
   }
 
-  /* ---------- Level meter ---------- */
-
-  .about__level {
-    padding: var(--space-6);
+  .about__meter {
+    height: 1.25rem;
+    margin-top: var(--space-2);
+    border: var(--line);
+    background-color: var(--paper);
   }
 
-  .about__level-row {
-    margin-bottom: var(--space-4);
-  }
-
-  .about__level-label {
-    font-size: var(--text-lg);
-    font-weight: 700;
-  }
-
-  .about__level-value {
-    font-size: var(--text-2xl);
-    font-weight: 700;
-  }
-
-  .about__level-bar {
-    height: 2rem;
-    border: var(--border-medium);
-    background-color: var(--color-white);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .about__level-fill {
-    background-color: var(--color-green);
+  .about__meter-fill {
+    display: block;
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background-image: var(--checker-pattern);
+    background-size: 4px 4px;
+    border-right: var(--line);
+    transition: width 1s steps(10, end) 250ms;
   }
 
-  .about__level-fill-label {
+  /* Empty until the window zooms open, then it fills in chunky steps. */
+  :global(:root[data-motion]) :global(.window:not(.is-open)) .about__meter-fill {
+    width: 0 !important;
+  }
+
+  .about__meter-label {
     font-size: var(--text-sm);
-    font-weight: 700;
+  }
+
+  .about__info-note {
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: var(--px) dotted var(--ink);
+    font-size: var(--text-sm);
+    text-align: center;
   }
 </style>

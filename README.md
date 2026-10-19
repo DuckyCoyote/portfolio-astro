@@ -1,112 +1,124 @@
-# 🎨 Portfolio Retro (Astro)
+# Portfolio Retro
 
-A pixel-perfect Astro port of the original React + Tailwind **Crear Portfolio Estética Retro** portfolio, rebuilt with **pure CSS** — no utility framework, no runtime UI library.
+Portfolio personal de Alejandro Daniel Cruz Hernández, desarrollador Full Stack, con la estética del Macintosh clásico de 1 bit y terminales TUI.
 
-The design is intentionally bold: thick black borders, flat neon colors, hard offset shadows, no rounded corners — straight 80s / 90s neobrutalism.
+Es una página de una sola vista, pero cada sección es una ventana del escritorio: barras de título a rayas, trama de puntos de fondo, iconos pixelados y un menú desplegable con un pato en lugar de la manzana. Las terminales, en verde fósforo, son el único color de la página.
 
----
-
-## ✨ Highlights
-
-- 🚀 **Astro 5** static output — zero JS by default, fastest possible deploy.
-- 🎨 **Pure CSS** written by hand, organized into `tokens.css`, `base.css`, `components.css`, and `utilities.css`. No Tailwind.
-- 🟢 **Same retro aesthetic** as the original: green-on-black, magenta corners, cream background, neobrutalist offset shadows.
-- 📬 **EmailJS contact form** with rate limiting (1-minute cooldown + 5 messages per day).
-- 📱 **Mobile-first responsive design** (no Tailwind, but breakpoints are written directly in the CSS).
-- 🔧 **Single source of truth**: every visible string comes from `src/data/portfolio.ts`.
+Construido con **Astro** y **CSS escrito a mano**, sin frameworks de UI ni de utilidades.
 
 ---
 
-## 📦 Installation
+## Características
+
+- **Escritorio Mac de 1 bit**: ventanas, diálogos, iconos de escritorio, vista de lista del Finder y panel "Obtener información".
+- **Terminales TUI**: `neofetch`, paneles con borde doble y una sesión que escribe sus comandos al aparecer.
+- **Tema claro y oscuro**: sigue al sistema operativo o se fija desde la barra de menús. La elección se guarda en el navegador.
+- **Panel de control**: tema y fuente de las terminales (VT323, IBM Plex Mono o JetBrains Mono).
+- **Animaciones del Finder**: las ventanas se abren con el zoom de rectángulos, los menús parpadean al elegir una opción y las ventanas del inicio se pueden arrastrar. Todo se desactiva con `prefers-reduced-motion`.
+- **Formulario de contacto con EmailJS**: validación, espera de 1 minuto entre envíos y límite de 5 mensajes al día.
+- **Accesible y responsive**: navegación por teclado, foco visible y diseño adaptado a móvil.
+- **Contenido centralizado**: todo el texto vive en `src/data/portfolio.ts`.
+- Y una sorpresa en la papelera.
+
+---
+
+## Instalación
 
 ```bash
 npm install
 ```
 
-## 🚀 Scripts
+## Scripts
 
 ```bash
-npm run dev      # local dev server on http://localhost:4321
-npm run build    # static production build into ./dist
-npm run preview  # preview the built site
+npm run dev      # servidor local en http://localhost:4321
+npm run build    # build estático en ./dist
+npm run preview  # previsualiza el build
 ```
 
 ---
 
-## 📁 Project Layout
+## Estructura
 
 ```
 src/
-├── components/         # One .astro file per section
-│   ├── Icon.astro      # Inline SVG icons (Lucide paths)
-│   ├── Navigation.astro
-│   ├── Hero.astro
-│   ├── About.astro
-│   ├── Skills.astro
-│   ├── Experience.astro
-│   ├── Projects.astro
-│   ├── Contact.astro
+├── components/
+│   ├── Window.astro        # Marco de ventana (título a rayas, info, cuerpo)
+│   ├── PixelIcon.astro     # Iconos de 1 bit dibujados desde rejillas de texto
+│   ├── Navigation.astro    # Barra de menús, menú del pato, tema y reloj
+│   ├── Hero.astro          # Escritorio inicial: "Léeme", terminal e iconos
+│   ├── About.astro         # Historia + panel "Obtener información"
+│   ├── Skills.astro        # Terminal con neofetch y paneles TUI
+│   ├── Experience.astro    # Vista de lista del Finder
+│   ├── Projects.astro      # Ventana con los proyectos
+│   ├── Contact.astro       # Diálogo con el formulario + terminal de contacto
+│   ├── Preferences.astro   # Panel de control (tema y fuente de terminal)
+│   ├── Trash.astro         # Papelera
 │   └── Footer.astro
 ├── layouts/
-│   └── BaseLayout.astro
+│   └── BaseLayout.astro    # <head>, preferencias antes del primer pintado, scripts
 ├── pages/
 │   └── index.astro
 ├── data/
-│   └── portfolio.ts    # All copy + config — single source of truth
+│   └── portfolio.ts        # Todo el contenido
 ├── scripts/
-│   └── contact-form.ts # Form behavior (vanilla TS + EmailJS)
+│   ├── contact-form.ts     # Validación, límites y envío con EmailJS
+│   ├── motion.ts           # Zoom de ventanas, escritura de terminales, arrastre
+│   ├── preferences.ts      # Tema y fuente de terminal
+│   ├── preferences-options.ts
+│   └── trash.ts
 └── styles/
-    ├── tokens.css      # CSS custom properties (colors, spacing, etc.)
-    ├── base.css        # Reset + global defaults
-    ├── components.css  # Component classes (.card, .btn, ...)
-    └── utilities.css   # Small helper classes (.grid--3, .anim-pulse, ...)
+    ├── tokens.css          # Colores (claro/oscuro), espaciado, tipografía
+    ├── base.css            # Reset, fuentes y fondo del escritorio
+    ├── components.css      # Ventana, terminal, botones, campos, diálogos…
+    └── utilities.css
 ```
 
-### Why this layout?
-
-- **`tokens.css`** — every visual value lives here. To re-theme the portfolio, edit only this file.
-- **`components.css`** — semantic, role-based classes (`section`, `card`, `btn`). The HTML reads like English.
-- **`utilities.css`** — narrow one-purpose classes (`grid--3`, `text-2xl`, `anim-pulse`). Used sparingly, never invented on the fly.
-- **`data/portfolio.ts`** — copy, projects, skills, social links. Change content without touching markup.
+- **`tokens.css`**: cada color es un par `light-dark()`, así que el tema oscuro se define en el mismo sitio que el claro. Para cambiar la paleta, edita solo este archivo.
+- **`Window.astro`**: todas las secciones lo usan; `variant="terminal"` convierte el cuerpo en una terminal.
+- **`PixelIcon.astro`**: para añadir un icono, dibuja su rejilla con `X` (tinta), `o` (papel) y `.` (transparente).
 
 ---
 
-## 📧 EmailJS setup
+## Configurar EmailJS
 
-1. Create an account on [emailjs.com](https://www.emailjs.com/).
-2. Copy **Service ID**, **Template ID**, and **Public Key** from the dashboard.
-3. Set them as environment variables (Vite-style, names must be prefixed with `PUBLIC_` because Astro exposes them to the client):
+1. Crea una cuenta en [emailjs.com](https://www.emailjs.com/).
+2. Copia el **Service ID**, el **Template ID** y la **Public Key**.
+3. Crea un archivo `.env` en la raíz (ya está en `.gitignore`). Astro solo expone al navegador las variables con prefijo `PUBLIC_`:
 
 ```env
-PUBLIC_EMAILJS_SERVICE_ID=your_service_id
-PUBLIC_EMAILJS_TEMPLATE_ID=your_template_id
-PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key
+PUBLIC_EMAILJS_SERVICE_ID=tu_service_id
+PUBLIC_EMAILJS_TEMPLATE_ID=tu_template_id
+PUBLIC_EMAILJS_PUBLIC_KEY=tu_public_key
 ```
 
-If the variables are missing, the form falls back to safe placeholder strings so the site still loads.
+4. Al desplegar (Netlify, Vercel…), define las mismas tres variables en el panel del hosting y añade tu dominio a los permitidos en EmailJS si lo tienes restringido.
+
+La librería se carga al pulsar "Enviar". Si no puede cargarse (por ejemplo, por un bloqueador de anuncios), el formulario muestra un aviso con el email de contacto. Sin JavaScript, el formulario abre el cliente de correo del visitante.
 
 ---
 
-## ✏️ Customization
+## Personalizar
 
-All content lives in **`src/data/portfolio.ts`**:
+Todo el contenido está en **`src/data/portfolio.ts`**:
 
-| Want to change…           | Edit                                                                  |
-| ------------------------- | --------------------------------------------------------------------- |
-| Navigation links          | `navItems`                                                            |
-| Hero copy                 | `heroContent`                                                         |
-| About copy + XP bar       | `aboutContent`                                                        |
-| Skills + categories       | `skillCategories` and `skillStats`                                    |
-| Job history               | `experiences`                                                         |
-| Projects, images, links   | `projects` (set `image: ''` to use the generic fallback)             |
-| Social links              | `socialLinks`                                                         |
-| Contact email / phone     | `contactEmail`, `contactPhone`                                        |
-| Site title / meta         | `siteMeta`                                                            |
+| Para cambiar…                 | Edita                                         |
+| ----------------------------- | --------------------------------------------- |
+| Enlaces de navegación         | `navItems`                                    |
+| Textos del inicio             | `heroContent`                                 |
+| Historia, datos y barra de XP | `aboutContent`                                |
+| Skills y estadísticas         | `skillCategories`, `skillStats`               |
+| Experiencia                   | `experiences`                                 |
+| Proyectos, imágenes, enlaces  | `projects` (`image: ''` usa la imagen genérica; `link: '#'` lo marca "En desarrollo") |
+| Email, redes y teléfono       | `contactEmail`, `socialLinks`, `contactPhone` |
+| Texto de contacto             | `contactIntro`                                |
+| Archivos de la papelera       | `trashItems`                                  |
+| Título y metadatos            | `siteMeta`                                    |
 
-To re-theme colors, spacing, or shadows, edit **`src/styles/tokens.css`**.
+Colores, espaciado y tipografía se cambian en **`src/styles/tokens.css`**.
 
 ---
 
-## 📄 License
+## Licencia
 
-Open source — copy, fork, remix. Made with ❤️ and pixels.
+Código abierto: cópialo, haz un fork, remézclalo. Hecho con ❤️ y píxeles.
